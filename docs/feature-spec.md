@@ -55,9 +55,9 @@ Status legend: **Settled** = agreed in design review · **Open** = still being d
 
 ## 4b. Build status
 
-Built (merged or in review): recording with start delay, pause and auto-resume; on-device detection; other-sound recognition; clips in three recording modes with playback from the timeline; night results; trends with calendar; settings; storage manager; encrypted backup and restore; CSV/JSON export; PDF reports; tip jar; onboarding, FAQ, privacy; new icon and store graphics.
+Built: recording with start delay, pause and auto-resume; on-device detection; other-sound recognition; clips in three recording modes with playback from the timeline; night results; remedies & factors with notes, weight and rest rating; "What helps" in trends; personal model trained on the phone from snoring / not-snoring answers; encryption at rest (Android Keystore, AES-256-GCM) with automatic migration of older files; trends with calendar; settings; storage manager; encrypted backup and restore; CSV/JSON export; PDF reports; tip jar; onboarding, FAQ, privacy; icon and store graphics.
 
-Not yet: remedies & factors (so trends can't yet compare with/without a remedy), personal-model labelling UI, encryption of stored nights, battery guides per phone maker, bedtime reminder, translations, crash reports.
+Not yet: battery guides per phone maker, bedtime reminder, crash reports, session extras (adjust times, merge, warnings, face-down screen-off, night clock, quick-settings tile), translations.
 
 ## 5. Remedies & factors — Settled
 

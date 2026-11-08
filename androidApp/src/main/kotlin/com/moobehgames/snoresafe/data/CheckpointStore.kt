@@ -14,7 +14,7 @@ class CheckpointStore(private val file: File) {
     @Synchronized
     fun read(): AccumulatorState? {
         if (!file.isFile) return null
-        return runCatching { SessionCodec.decodeCheckpoint(file.readText()) }
+        return runCatching { SessionCodec.decodeCheckpoint(file.readSecureText()) }
             .onFailure { Log.w("CheckpointStore", "Discarding unreadable checkpoint", it) }
             .getOrNull()
     }

@@ -258,11 +258,12 @@ private fun WhatHelps(
                     Column(Modifier.weight(1f)) {
                         Text(name, style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            stringResource(
-                                R.string.impact_line,
+                            androidx.compose.ui.res.pluralStringResource(
+                                R.plurals.impact_line,
+                                impact.nightsWith,
+                                impact.nightsWith,
                                 impact.averageWith.roundToInt().toString(),
                                 impact.averageWithout.roundToInt().toString(),
-                                impact.nightsWith,
                             ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

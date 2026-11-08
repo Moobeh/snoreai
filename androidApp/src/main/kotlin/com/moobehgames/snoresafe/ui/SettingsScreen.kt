@@ -85,12 +85,15 @@ fun SettingsScreen(
         SwitchRow(stringResource(R.string.personal_use), stringResource(R.string.personal_use_desc), settings.usePersonalModel) { on ->
             update { it.copy(usePersonalModel = on) }
         }
+        val minEach = com.moobehgames.snoresafe.core.ml.PersonalHead.MIN_EXAMPLES_PER_CLASS
         Text(
-            if (labelCounts.enoughToTrain) {
-                stringResource(R.string.personal_status_trained, labelCounts.total, labelCounts.snoring, labelCounts.notSnoring)
-            } else {
-                stringResource(R.string.personal_status_needs, labelCounts.snoring, labelCounts.notSnoring, com.moobehgames.snoresafe.core.ml.PersonalHead.MIN_EXAMPLES_PER_CLASS)
-            },
+            (
+                if (labelCounts.enoughToTrain) {
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.personal_status_trained, labelCounts.total, labelCounts.total)
+                } else {
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.personal_status_needs, minEach, minEach)
+                }
+            ) + " " + stringResource(R.string.personal_status_split, labelCounts.snoring.toString(), labelCounts.notSnoring.toString()),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp),

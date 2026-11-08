@@ -241,7 +241,7 @@
 
     <!-- FAQ -->
     <string name="faq_q1">Does SnoreSafe upload my recordings?</string>
-    <string name="faq_a1">No. SnoreSafe has no internet permission, so it can\'t send anything anywhere. Recordings and results stay on your phone unless you export or share them yourself.</string>
+    <string name="faq_a1">No. SnoreSafe has no internet permission, so it can\'t send anything anywhere. Recordings and results stay on your phone, encrypted, unless you export or share them yourself.</string>
     <string name="faq_q2">How does SnoreSafe recognise snoring?</string>
     <string name="faq_a2">A sound-recognition model runs on your phone and listens in short slices. It recognises snoring and about 30 other kinds of sound, such as talking, coughing, alarms, a crying baby or traffic.</string>
     <string name="faq_q3">What is the Snore Score?</string>
@@ -260,7 +260,7 @@
     <string name="faq_a9">No. SnoreSafe is a wellness tool and can\'t diagnose any condition. If you are worried about your sleep or breathing, talk to a doctor. You can share a PDF report with them.</string>
 
     <!-- Privacy -->
-    <string name="privacy_body">SnoreSafe collects nothing.\n\n• The app has no internet permission. It cannot send data anywhere.\n• There are no accounts, ads, analytics or trackers.\n• Audio is analysed on this phone. Recordings and results are stored in the app\'s private storage, which other apps can\'t read.\n• Nothing is included in your phone\'s cloud backup or copied to a new phone automatically.\n• Data leaves the phone only when you choose to: a backup file, an export, or a report you share.\n• Tips are handled by Google Play. SnoreSafe only learns that a tip was made, nothing about you.\n• Uninstalling SnoreSafe deletes all of its data.</string>
+    <string name="privacy_body">SnoreSafe collects nothing.\n\n• The app has no internet permission. It cannot send data anywhere.\n• There are no accounts, ads, analytics or trackers.\n• Audio is analysed on this phone. Recordings, results and notes are encrypted with a key kept in your phone\'s secure key store, inside the app\'s private storage.\n• Nothing is included in your phone\'s cloud backup or copied to a new phone automatically.\n• Data leaves the phone only when you choose to: a backup file, an export, or a report you share.\n• Tips are handled by Google Play. SnoreSafe only learns that a tip was made, nothing about you.\n• Uninstalling SnoreSafe deletes all of its data.</string>
 
     <!-- Notification -->
     <string name="channel_recording">Sleep session</string>
@@ -357,7 +357,6 @@
     <string name="tonight">Tonight</string>
     <string name="tonight_none">Trying something tonight? Add remedies and factors to see what helps.</string>
     <string name="edit">Edit</string>
-    <string name="add_your_own">Add your own</string>
     <string name="add_remedy">New remedy</string>
     <string name="add_factor">New factor</string>
     <string name="name_label">Name</string>
@@ -378,7 +377,6 @@
     <string name="rest_5">Refreshed</string>
     <string name="what_helps">What helps</string>
     <string name="what_helps_empty">Tag a few nights with remedies and factors, with and without each one, to see what changes your score.</string>
-    <string name="impact_line">%1$s vs %2$s without · %3$d nights</string>
     <string name="save">Save</string>
 
     <!-- Personal model -->
@@ -391,9 +389,20 @@
     <string name="section_personal">Personal model</string>
     <string name="personal_use">Learn from my answers</string>
     <string name="personal_use_desc">Mark recordings as snoring or not, and SnoreSafe learns your bedroom: your snore, your partner, your fan. Trained and kept only on this phone.</string>
-    <string name="personal_status_trained">Learned from %1$d answers (%2$d snoring, %3$d not snoring).</string>
-    <string name="personal_status_needs">%1$d snoring and %2$d not-snoring answers so far. Needs at least %3$d of each to start learning.</string>
     <string name="personal_reset">Forget what it has learned</string>
     <string name="personal_reset_body">All your answers and the personal model will be deleted. Detection goes back to the standard model.</string>
     <string name="labels_hint">Tip: tell SnoreSafe which recordings are really snoring to make it more accurate for you.</string>
+    <plurals name="impact_line">
+        <item quantity="one">%2$s vs %3$s without · %1$d night</item>
+        <item quantity="other">%2$s vs %3$s without · %1$d nights</item>
+    </plurals>
+    <plurals name="personal_status_trained">
+        <item quantity="one">Learned from %1$d answer.</item>
+        <item quantity="other">Learned from %1$d answers.</item>
+    </plurals>
+    <string name="personal_status_split">Snoring: %1$s · Not snoring: %2$s</string>
+    <plurals name="personal_status_needs">
+        <item quantity="one">Needs at least %1$d answer of each kind to start learning.</item>
+        <item quantity="other">Needs at least %1$d answers of each kind to start learning.</item>
+    </plurals>
 </resources>

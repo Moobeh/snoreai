@@ -30,7 +30,7 @@ class AudioStore(private val root: File) {
         if (!SAFE_ID.matches(sessionId)) return SessionAudio(sessionId)
         val index = File(File(root, sessionId), INDEX)
         if (!index.isFile) return SessionAudio(sessionId)
-        return runCatching { SessionCodec.decodeAudio(index.readText()) }
+        return runCatching { SessionCodec.decodeAudio(index.readSecureText()) }
             .onFailure { Log.w(TAG, "Unreadable audio index for $sessionId", it) }
             .getOrDefault(SessionAudio(sessionId))
     }

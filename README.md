@@ -22,7 +22,9 @@ mic (16 kHz mono) → 0.975 s window, 0.49 s hop → YAMNet (LiteRT, on device)
   → SessionSummary (saved on device)
 ```
 
-Raw audio is analysed and discarded. If the phone kills the app overnight, the last
+Raw audio is analysed and discarded, except the clips the recording mode keeps. Everything stored
+(nights, notes, settings, checkpoints, the personal model, recordings) is encrypted with an
+AES-256-GCM key held in the Android Keystore; files from older versions are encrypted on first start. If the phone kills the app overnight, the last
 checkpoint is turned into a night marked "recovered" on the next launch.
 
 ## Build

@@ -7,6 +7,7 @@ import com.moobehgames.snoresafe.core.audio.AudioClip
 import com.moobehgames.snoresafe.core.audio.ClipKind
 import com.moobehgames.snoresafe.core.settings.RecordingMode
 import com.moobehgames.snoresafe.data.AudioStore
+import com.moobehgames.snoresafe.data.writeBytesSecurely
 import java.io.File
 import java.util.UUID
 import kotlin.math.max
@@ -87,7 +88,7 @@ class ClipRecorder(
 
     private fun startClip(frame: FrameEvidence, verdict: FrameVerdict, hop: FloatArray, hopStartMs: Long, scores: FloatArray?): OpenClip? {
         val id = UUID.randomUUID().toString()
-        val file = File(store.dirFor(sessionId), "$id.m4a")
+        val file = File(store.dirFor(sessionId), "$id.m4a$PART")
         val writer = runCatching { AacFileWriter(file, sampleRate) }.getOrElse {
             Log.w(TAG, "Encoder unavailable", it)
             return null
@@ -112,6 +113,7 @@ class ClipRecorder(
         clip = null
         val ok = runCatching { c.writer.finish() }.getOrDefault(false)
         if (!ok) return
+        val final = seal(c.file) ?: return
         val features = if (c.featureCount > 0) c.featureSum.map { it / c.featureCount } else null
         store.addClip(
             sessionId,
@@ -120,8 +122,8 @@ class ClipRecorder(
                 kind = c.kind,
                 startEpochMs = c.startMs,
                 durationMs = c.writer.durationMs,
-                fileName = c.file.name,
-                sizeBytes = c.file.length(),
+                fileName = final.name,
+                sizeBytes = final.length(),
                 peak = c.peak,
                 sound = if (c.kind == ClipKind.SOUND) c.evidence.otherSound else null,
                 label = if (c.kind == ClipKind.SOUND) c.evidence.otherLabel else null,
@@ -139,7 +141,7 @@ class ClipRecorder(
         }
         if (s == null) {
             val id = UUID.randomUUID().toString()
-            val file = File(store.dirFor(sessionId), "night-$id.m4a")
+            val file = File(store.dirFor(sessionId), "night-$id.m4a$PART")
             val writer = runCatching { AacFileWriter(file, sampleRate) }.getOrNull() ?: return
             s = OpenSegment(id, file, writer, hopStartMs)
             segment = s
@@ -152,11 +154,24 @@ class ClipRecorder(
         val s = segment ?: return
         segment = null
         if (!runCatching { s.writer.finish() }.getOrDefault(false)) return
+        val final = seal(s.file) ?: return
         store.addClip(
             sessionId,
-            AudioClip(s.id, ClipKind.SEGMENT, s.startMs, s.writer.durationMs, s.file.name, s.file.length(), peak = 0f),
+            AudioClip(s.id, ClipKind.SEGMENT, s.startMs, s.writer.durationMs, final.name, final.length(), peak = 0f),
         )
         if (endMs < s.startMs) Log.w(TAG, "Segment ended before it started")
+    }
+
+    /** Encrypts a finished recording into its final name and removes the unencrypted working file. */
+    private fun seal(part: File): File? = try {
+        val final = File(part.parentFile, part.name.removeSuffix(PART))
+        final.writeBytesSecurely(part.readBytes())
+        final
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not seal recording", e)
+        null
+    } finally {
+        part.delete()
     }
 
     private fun addFeatures(c: OpenClip, scores: FloatArray) {
@@ -176,5 +191,8 @@ class ClipRecorder(
         const val MAX_CLIP_MS = 30_000L
         const val SEGMENT_MS = 10L * 60 * 1000
         const val MIN_FREE_BYTES = 200L * 1024 * 1024
+
+        /** Suffix of a recording still being written (unencrypted, deleted when sealed or on next start). */
+        const val PART = ".part"
     }
 }

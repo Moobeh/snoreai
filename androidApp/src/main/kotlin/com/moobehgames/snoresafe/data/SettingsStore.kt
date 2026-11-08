@@ -25,5 +25,5 @@ class SettingsStore(private val file: File) {
     @Synchronized
     fun replace(settings: AppSettings) = update { settings }
 
-    private fun load(): AppSettings = if (file.isFile) SessionCodec.decodeSettings(file.readText()) else AppSettings()
+    private fun load(): AppSettings = if (file.isFile) SessionCodec.decodeSettings(file.readSecureText()) else AppSettings()
 }

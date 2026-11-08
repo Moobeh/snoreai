@@ -69,8 +69,8 @@ class PersonalModelStore(private val dir: File, private val audio: AudioStore) {
     private fun saveSet(set: List<TrainingExample>) = setFile.writeTextAtomically(SessionCodec.encodeTrainingSet(set))
 
     private fun loadSet(): List<TrainingExample> =
-        if (setFile.isFile) runCatching { SessionCodec.decodeTrainingSet(setFile.readText()) }.getOrDefault(emptyList()) else emptyList()
+        if (setFile.isFile) runCatching { SessionCodec.decodeTrainingSet(setFile.readSecureText()) }.getOrDefault(emptyList()) else emptyList()
 
     private fun loadModel(): PersonalHeadWeights? =
-        if (modelFile.isFile) runCatching { SessionCodec.decodeHead(modelFile.readText()) }.getOrNull() else null
+        if (modelFile.isFile) runCatching { SessionCodec.decodeHead(modelFile.readSecureText()) }.getOrNull() else null
 }

@@ -19,6 +19,10 @@ class SnoreSafeApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Before anything reads data: encrypt files from older versions, clear crash leftovers.
+        // Checkpoint and settings are tiny; audio may take a moment, but this runs once per start
+        // and only rewrites files that aren't encrypted yet.
+        com.moobehgames.snoresafe.data.Migration.run(filesDir)
         graph = AppGraph(this)
         Notifications.createChannels(this)
         // A fresh process means no session is running here: any leftover checkpoint

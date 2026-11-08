@@ -18,7 +18,7 @@ class LogStore(private val dir: File) {
         if (!SAFE_ID.matches(sessionId)) return NightLog(sessionId)
         val f = File(dir, "$sessionId.json")
         if (!f.isFile) return NightLog(sessionId)
-        return runCatching { SessionCodec.decodeLog(f.readText()) }
+        return runCatching { SessionCodec.decodeLog(f.readSecureText()) }
             .onFailure { Log.w("LogStore", "Unreadable log for $sessionId", it) }
             .getOrDefault(NightLog(sessionId))
     }
@@ -34,7 +34,7 @@ class LogStore(private val dir: File) {
     @Synchronized
     fun all(): Map<String, NightLog> =
         (dir.listFiles { f -> f.isFile && f.name.endsWith(".json") } ?: emptyArray())
-            .mapNotNull { f -> runCatching { SessionCodec.decodeLog(f.readText()) }.getOrNull() }
+            .mapNotNull { f -> runCatching { SessionCodec.decodeLog(f.readSecureText()) }.getOrNull() }
             .associateBy { it.sessionId }
 
     @Synchronized

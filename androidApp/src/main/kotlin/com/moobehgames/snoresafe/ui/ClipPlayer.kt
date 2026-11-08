@@ -6,6 +6,8 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import android.media.MediaDataSource
+import com.moobehgames.snoresafe.data.readSecureBytes
 import java.io.File
 
 /** Plays one recording at a time. */
@@ -33,7 +35,8 @@ class ClipPlayer {
         try {
             player = MediaPlayer().apply {
                 setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-                setDataSource(file.absolutePath)
+                // Recordings are encrypted on disk; play them from memory, never from a decrypted file.
+                setDataSource(ByteArrayDataSource(file.readSecureBytes()))
                 setOnCompletionListener { _state.value = _state.value.copy(playing = false) }
                 prepare()
                 if (startMs > 0) seekTo(startMs.coerceAtMost(duration - 500).coerceAtLeast(0))
@@ -51,4 +54,17 @@ class ClipPlayer {
         player = null
         _state.value = State()
     }
+}
+
+private class ByteArrayDataSource(private val data: ByteArray) : MediaDataSource() {
+    override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
+        if (position >= data.size) return -1
+        val n = minOf(size.toLong(), data.size - position).toInt()
+        System.arraycopy(data, position.toInt(), buffer, offset, n)
+        return n
+    }
+
+    override fun getSize(): Long = data.size.toLong()
+
+    override fun close() = Unit
 }

@@ -432,7 +432,7 @@ class MainActivity : ComponentActivity() {
                         // Copies only the pinned clips into the share folder; the rest of the audio stays private.
                         val clips = audio?.clips?.filter { it.pinned }.orEmpty().mapNotNull { clip ->
                             val src = appGraph.audio.fileFor(session.id, clip)
-                            if (src.isFile) src.copyTo(File(dir, clip.fileName), overwrite = true) else null
+                            if (src.isFile) File(dir, clip.fileName).also { it.writeBytes(com.moobehgames.snoresafe.data.Secure.decrypt(src.readBytes())) } else null
                         }
                         listOf(pdf) + clips
                     }

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import com.moobehgames.snoresafe.AppGraph
 import com.moobehgames.snoresafe.core.session.SessionCodec
+import com.moobehgames.snoresafe.data.readSecureBytes
+import com.moobehgames.snoresafe.data.writeBytesSecurely
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -39,7 +41,7 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                         val f = graph.audio.fileFor(s.id, clip)
                         if (!f.isFile) continue
                         zip.putNextEntry(ZipEntry("audio/${s.id}/${clip.fileName}"))
-                        f.inputStream().use { it.copyTo(zip) }
+                        zip.write(f.readSecureBytes())
                         zip.closeEntry()
                     }
                 }
@@ -89,7 +91,7 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                         val dest = graph.audio.dirFor(summary.id)
                         audio.clips.forEach { clip ->
                             val src = File(audioDir, clip.fileName)
-                            if (SAFE_FILE.matches(clip.fileName) && src.isFile) src.copyTo(File(dest, clip.fileName), overwrite = true)
+                            if (SAFE_FILE.matches(clip.fileName) && src.isFile) File(dest, clip.fileName).writeBytesSecurely(src.readBytes())
                         }
                         graph.audio.write(audio.copy(clips = audio.clips.filter { File(dest, it.fileName).isFile }))
                     }
