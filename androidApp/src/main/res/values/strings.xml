@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SnoreSafe</string>
+
+    <!-- Home -->
+    <string name="home_tagline">Private snore tracking. Nothing leaves your phone.</string>
+    <string name="start_session">Start sleep session</string>
+    <string name="past_nights">Past nights</string>
+    <string name="no_sessions">No nights recorded yet. Put your phone by the bed, plug it in and tap start.</string>
+    <string name="permission_needed">SnoreSafe needs the microphone to hear snoring. Audio is analysed on this phone and never uploaded.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="battery_title">Keep SnoreSafe running overnight</string>
+    <string name="battery_body">Your phone may stop apps while you sleep. Allow SnoreSafe to run unrestricted so no part of the night is missed.</string>
+    <string name="battery_action">Battery settings</string>
+    <string name="placement_tip">Tip: place the phone face down by your bed, about an arm\'s length from your head, with the charger connected.</string>
+
+    <!-- Recording -->
+    <string name="recording_listening">Listening</string>
+    <string name="recording_paused">Paused</string>
+    <string name="recording_starting">Starting…</string>
+    <string name="recording_snoring_now">Snoring detected</string>
+    <string name="recording_elapsed">Elapsed</string>
+    <string name="recording_score_so_far">Score so far</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="stop_confirm_title">Stop this session?</string>
+    <string name="stop_confirm_body">Your night will be saved and analysed.</string>
+    <string name="keep_listening">Keep listening</string>
+
+    <!-- Results -->
+    <string name="snore_score">Snore Score</string>
+    <string name="time_in_bed">Time in bed</string>
+    <string name="monitored">Monitored</string>
+    <string name="snoring">Snoring</string>
+    <string name="band_quiet">Quiet</string>
+    <string name="band_light">Light</string>
+    <string name="band_loud">Loud</string>
+    <string name="band_epic">Epic</string>
+    <string name="timeline">Night timeline</string>
+    <string name="other_sounds">Other sounds heard</string>
+    <string name="interruptions">Interruptions</string>
+    <string name="interruption_item">Monitoring stopped %1$s – %2$s</string>
+    <string name="recovered_note">SnoreSafe was stopped by your phone during the night. Results cover the time up to %1$s. Check the battery settings on the home screen.</string>
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm_title">Delete this night?</string>
+    <string name="delete_confirm_body">This can\'t be undone.</string>
+    <string name="cancel">Cancel</string>
+    <string name="percent_value">%1$d%%</string>
+
+    <string name="sound_speech">Talking</string>
+    <string name="sound_cough">Coughing or sneezing</string>
+    <string name="sound_breathing">Heavy breathing</string>
+    <string name="sound_pet">Pets</string>
+    <string name="sound_fan_or_ac">Fan or air conditioning</string>
+    <string name="sound_traffic">Traffic</string>
+    <string name="sound_media">TV or music</string>
+    <string name="sound_rain">Rain or storm</string>
+    <string name="sound_baby">Baby</string>
+
+    <!-- Notification -->
+    <string name="channel_recording">Sleep session</string>
+    <string name="channel_recording_desc">Shown while SnoreSafe is listening overnight.</string>
+    <string name="notification_recording_title">SnoreSafe is listening</string>
+    <string name="notification_recording_text">Audio stays on this phone.</string>
+
+    <!-- Errors -->
+    <string name="error_mic">The microphone could not be opened. Another app may be using it.</string>
+    <string name="error_model">The sound model could not be loaded.</string>
+    <string name="error_generic">Recording stopped because of an error: %1$s</string>
+    <string name="dismiss">Dismiss</string>
+
+    <string name="medical_disclaimer">SnoreSafe is a wellness tool, not a medical device. It does not diagnose any condition. If you are worried about your sleep or breathing, talk to a doctor.</string>
+</resources>
