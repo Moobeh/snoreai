@@ -36,6 +36,7 @@ Status legend: **Settled** = agreed in design review · **Open** = still being d
 - Engine: LiteRT on Android, Core ML on iOS. No remote AI.
 - Base sound classifier: YAMNet (Apache-2.0), which already includes snoring and other night sounds. No central fine-tuning for v1.
 - Snore intensity from calibrated loudness × duration.
+- **Other sounds:** ~30 categories recognised and reported separately with clips, e.g. sleep talking, shouting, crying, a crying baby, coughing, pets, birds, insects, traffic, sirens, car alarms, smoke/fire alarms, alarm clocks, phones, doorbells/knocking, doors, footsteps, water/toilet, breaking glass, bangs/fireworks, aircraft, trains, TV/music, rain, thunder, wind. Alarms, sirens, glass, bangs, doorbells and a crying baby are highlighted as "worth knowing".
 - **Personal model:** user marks clips "snoring" / "not snoring"; the classifier retrains on the phone and adapts to that bedroom.
 - Experimental: breathing rate, breathing pauses. Never a diagnosis; long pauses show a "consider seeing a doctor" note.
 - Sensitivity control, per-session or default volume offset, light-snoring filter, device calibration.
@@ -51,6 +52,12 @@ Status legend: **Settled** = agreed in design review · **Open** = still being d
 - Comparison with the user's own history (never with other users).
 - Remedies & factors used, notes, weight, wake-up rest rating.
 - Clip list: filter, sort, grid/list, multi-select, bulk delete.
+
+## 4b. Build status
+
+Built (merged or in review): recording with start delay, pause and auto-resume; on-device detection; other-sound recognition; clips in three recording modes with playback from the timeline; night results; trends with calendar; settings; storage manager; encrypted backup and restore; CSV/JSON export; PDF reports; tip jar; onboarding, FAQ, privacy; new icon and store graphics.
+
+Not yet: remedies & factors (so trends can't yet compare with/without a remedy), personal-model labelling UI, encryption of stored nights, battery guides per phone maker, bedtime reminder, translations, crash reports.
 
 ## 5. Remedies & factors — Settled
 
@@ -88,7 +95,7 @@ Status legend: **Settled** = agreed in design review · **Open** = still being d
 - Hidden automatically after any tip (purchase state is read on the device). "I've already supported you" button also hides it without paying.
 - One small card, shown only at good moments (7th night, new lowest score, successful export), at most once a month, never during recording or onboarding. Small "Support" entry in settings until a tip is made.
 - No codes, no external payment links.
-- To confirm in the first build: Play Billing works with no `INTERNET` permission.
+- Play Billing 8 bundles Google's `datatransport` diagnostics (which would need `INTERNET`). The app strips its permissions, upload scheduler and backend registration in the manifest; billing still works through the on-device Play Store. The build guard fails if any of it returns. Tip products to create in Play Console (one-time, consumable): `tip_coffee`, `tip_lunch`, `tip_thanks`.
 
 ## 12. Profile & settings — Settled
 
