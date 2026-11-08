@@ -44,6 +44,9 @@ fun HomeScreen(
     permissionDenied: Boolean,
     startDelayMinutes: Int,
     showSupportCard: Boolean,
+    tonightTags: Set<String>,
+    customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
+    onEditTonight: () -> Unit,
     onStart: () -> Unit,
     onOpenSession: (String) -> Unit,
     onSupport: () -> Unit,
@@ -74,6 +77,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
+            item { TonightCard(tonightTags, customTags, onEditTonight) }
             if (showSupportCard) item { SupportCard(onSupport, onDismissSupport) }
             if (permissionDenied) item { PermissionCard() }
             item { BatteryCard() }
@@ -172,6 +176,23 @@ private fun SupportCard(onSupport: () -> Unit, onDismiss: () -> Unit) {
             Row {
                 TextButton(onClick = onSupport) { Text(stringResource(R.string.support_card_action)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.support_not_now)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TonightCard(tags: Set<String>, custom: List<com.moobehgames.snoresafe.core.tags.CustomTag>, onEdit: () -> Unit) {
+    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.tonight), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                TextButton(onClick = onEdit) { Text(stringResource(R.string.edit)) }
+            }
+            if (tags.isEmpty()) {
+                Text(stringResource(R.string.tonight_none), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                TagChips(tags, custom, onEdit)
             }
         }
     }

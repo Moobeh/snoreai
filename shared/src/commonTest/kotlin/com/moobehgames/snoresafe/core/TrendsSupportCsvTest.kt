@@ -79,7 +79,7 @@ class TrendsSupportCsvTest {
             soundEvents = listOf(SoundEvent(NightSound.CAR_ALARM, "Car alarm", 0, 1000, 0.8f), SoundEvent(NightSound.CAR_ALARM, "Car alarm", 5000, 6000, 0.7f)),
             otherSoundMs = mapOf(NightSound.CAR_ALARM to 120_000L),
         )
-        val csv = CsvExport.sessions(listOf(n)) { "t$it" }
+        val csv = CsvExport.sessions(listOf(n), { "t$it" })
         val row = csv.lines()[1]
         assertTrue(row.contains("car alarm x2"), row)
         assertEquals("\"a,b\"", CsvExport.escape("a,b"))

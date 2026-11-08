@@ -71,6 +71,11 @@ import kotlin.math.roundToInt
 fun ResultsScreen(
     session: SessionSummary,
     audio: SessionAudio,
+    log: com.moobehgames.snoresafe.core.tags.NightLog,
+    customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
+    weightUnit: com.moobehgames.snoresafe.core.settings.WeightUnit,
+    onSaveLog: (com.moobehgames.snoresafe.core.tags.NightLog) -> Unit,
+    onEditTags: () -> Unit,
     player: ClipPlayer,
     showTutorial: Boolean,
     clipFile: (AudioClip) -> java.io.File,
@@ -134,6 +139,8 @@ fun ResultsScreen(
                     for (band in listOf(SnoreBand.LIGHT, SnoreBand.LOUD, SnoreBand.EPIC)) BandRow(session, band)
                 }
             }
+
+            NightLogSection(log, customTags, weightUnit, onSaveLog, onEditTags)
 
             Text(stringResource(R.string.timeline), style = MaterialTheme.typography.titleMedium)
             Timeline(session, audio, onTap = { epoch ->

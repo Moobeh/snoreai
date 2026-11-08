@@ -22,8 +22,14 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
         BackupCipher.encryptingStream(out, password).use { encrypted ->
             ZipOutputStream(encrypted).use { zip ->
                 zip.putText(MANIFEST, """{"format":"snoresafe-backup","version":1,"createdAt":${System.currentTimeMillis()}}""")
+                val custom = graph.settings.current.customTags
+                if (custom.isNotEmpty()) {
+                    zip.putText(CUSTOM_TAGS, SessionCodec.encodeCustomTags(custom))
+                }
                 for (s in graph.sessions.all()) {
                     zip.putText("sessions/${s.id}.json", SessionCodec.encodeSummary(s))
+                    val log = graph.logs.get(s.id)
+                    if (!log.isEmpty) zip.putText("logs/${s.id}.json", SessionCodec.encodeLog(log))
                     val audio = graph.audio.read(s.id)
                     if (audio.clips.isEmpty() && !audio.protected) continue
                     zip.putText("audio/${s.id}/index.json", SessionCodec.encodeAudio(audio))
@@ -53,7 +59,7 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                         val name = entry.name
                         if (name == MANIFEST) sawManifest = true
                         // Only exact, expected paths: no "..", no absolute paths (zip-slip safe).
-                        if (name != MANIFEST && !SESSION_PATH.matches(name) && !AUDIO_PATH.matches(name)) continue
+                        if (name != MANIFEST && name != CUSTOM_TAGS && !SESSION_PATH.matches(name) && !LOG_PATH.matches(name) && !AUDIO_PATH.matches(name)) continue
                         val target = File(staging, name)
                         target.parentFile?.mkdirs()
                         target.outputStream().use { zip.copyTo(it) }
@@ -61,6 +67,12 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                 }
             }
             if (!sawManifest) throw BackupCipher.WrongPasswordOrCorrupt()
+
+            // Custom remedies and factors: add any the phone doesn't have yet, so restored nights show their names.
+            File(staging, CUSTOM_TAGS).takeIf { it.isFile }?.let { f ->
+                val restored = runCatching { SessionCodec.decodeCustomTags(f.readText()) }.getOrDefault(emptyList())
+                graph.settings.update { s -> s.copy(customTags = s.customTags + restored.filter { r -> s.customTags.none { it.id == r.id } }) }
+            }
 
             val existing = graph.sessions.all().map { it.id }.toSet()
             var added = 0
@@ -79,6 +91,11 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                         }
                         graph.audio.write(audio.copy(clips = audio.clips.filter { File(dest, it.fileName).isFile }))
                     }
+                }
+                File(staging, "logs/${summary.id}.json").takeIf { it.isFile }?.let { f ->
+                    runCatching { SessionCodec.decodeLog(f.readText()) }.getOrNull()
+                        ?.takeIf { it.sessionId == summary.id }
+                        ?.let { graph.logs.save(it) }
                 }
                 graph.sessions.save(summary)
                 added++
@@ -99,6 +116,8 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
 
     private companion object {
         const val MANIFEST = "manifest.json"
+        const val CUSTOM_TAGS = "custom-tags.json"
+        val LOG_PATH = Regex("logs/[A-Za-z0-9-]{1,64}\\.json")
         val SESSION_PATH = Regex("sessions/[A-Za-z0-9-]{1,64}\\.json")
         val AUDIO_PATH = Regex("audio/[A-Za-z0-9-]{1,64}/[A-Za-z0-9._-]{1,80}")
         val SAFE_FILE = Regex("[A-Za-z0-9-][A-Za-z0-9._-]{0,79}")

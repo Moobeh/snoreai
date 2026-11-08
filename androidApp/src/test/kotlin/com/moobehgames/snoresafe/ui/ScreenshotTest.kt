@@ -47,21 +47,29 @@ class ScreenshotTest {
     private val night = SampleData.night(0, intensity = 0.9f, seed = 11)
 
     @Test fun home() = shoot("01-home") {
-        HomeScreen(SampleData.history(), false, 0, false, noop, {}, noop, noop)
+        HomeScreen(SampleData.history(), false, 0, false, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), emptyList(), noop, noop, {}, noop, noop)
     }
 
     @Test fun results() = shoot("02-results") {
-        ResultsScreen(night, SampleData.audio(night), ClipPlayer(), false, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
+        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), false, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
     }
 
     /** Whole results page in one tall image, to check the lower sections render. Not a store screenshot. */
     @Test @Config(qualifiers = "w360dp-h2000dp-port-night-xxhdpi")
     fun resultsFullPage() = shoot("x-results-full") {
-        ResultsScreen(night, SampleData.audio(night), ClipPlayer(), true, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
+        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), true, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
     }
 
     @Test fun trends() = shoot("03-trends") {
-        TrendsScreen(SampleData.history(), {}, noop)
+        val h = SampleData.history()
+        TrendsScreen(h, SampleData.logs(h), emptyList(), {}, noop)
+    }
+
+    /** Whole trends page, to check the "What helps" section. Not a store screenshot. */
+    @Test @Config(qualifiers = "w360dp-h2200dp-port-night-xxhdpi")
+    fun trendsFullPage() = shoot("x-trends-full") {
+        val h = SampleData.history()
+        TrendsScreen(h, SampleData.logs(h), emptyList(), {}, noop)
     }
 
     @Test fun recording() = shoot("04-recording") {

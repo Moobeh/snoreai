@@ -62,6 +62,16 @@ object SampleData {
     fun history(): List<SessionSummary> =
         (0 until 26).filter { it % 7 != 3 }.map { d -> night(d, intensity = 0.35f + (d % 9) / 10f + if (d > 14) 0.3f else 0f, seed = d + 2) }
 
+    /** Mouth tape on quieter nights, alcohol on louder ones, so "What helps" has something to show. */
+    fun logs(history: List<SessionSummary>): Map<String, com.moobehgames.snoresafe.core.tags.NightLog> = history.associate { s ->
+        val tags = buildSet {
+            if (s.snoreScore < 25) add(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id)
+            if (s.snoreScore > 35) add(com.moobehgames.snoresafe.core.tags.BuiltInTag.ALCOHOL.id)
+            if (s.id.hashCode() % 3 == 0) add(com.moobehgames.snoresafe.core.tags.BuiltInTag.SIDE_SLEEPING.id)
+        }
+        s.id to com.moobehgames.snoresafe.core.tags.NightLog(s.id, tags, restRating = if (s.snoreScore < 25) 4 else 2)
+    }
+
     fun audio(s: SessionSummary): SessionAudio {
         fun clip(id: String, kind: ClipKind, minute: Int, peak: Float, sound: NightSound? = null, pinned: Boolean = false) =
             AudioClip(id, kind, s.startEpochMs + minute * MIN, 14_000, "$id.m4a", 60_000, peak, sound, sound?.name, pinned)

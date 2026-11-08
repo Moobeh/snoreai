@@ -2,6 +2,7 @@ package com.moobehgames.snoresafe.core.settings
 
 import com.moobehgames.snoresafe.core.analysis.DetectionSettings
 import com.moobehgames.snoresafe.core.support.SupportState
+import com.moobehgames.snoresafe.core.tags.CustomTag
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,6 +19,12 @@ enum class RecordingMode {
     companion object {
         val DEFAULT = ALL_SNORING
     }
+}
+
+@Serializable
+enum class WeightUnit(val perKg: Float) {
+    KG(1f),
+    LB(2.20462f),
 }
 
 @Serializable
@@ -48,6 +55,10 @@ data class AppSettings(
     val onboardingDone: Boolean = false,
     val resultsTutorialSeen: Boolean = false,
     val support: SupportState = SupportState(),
+    /** Remedies and factors picked for the next night; kept night to night until changed. */
+    val tonightTags: Set<String> = emptySet(),
+    val customTags: List<CustomTag> = emptyList(),
+    val weightUnit: WeightUnit = WeightUnit.KG,
 ) {
     init {
         require(startDelayMinutes in 0..120 && autoResumeMinutes in 0..240)

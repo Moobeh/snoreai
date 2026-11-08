@@ -105,6 +105,14 @@ fun SettingsScreen(settings: AppSettings, update: ((AppSettings) -> AppSettings)
             onSelect = { v -> update { it.copy(autoResumeMinutes = v) } },
         )
 
+        ChoiceRow(
+            stringResource(R.string.weight_unit),
+            com.moobehgames.snoresafe.core.settings.WeightUnit.entries,
+            settings.weightUnit,
+            label = { stringResource(if (it == com.moobehgames.snoresafe.core.settings.WeightUnit.KG) R.string.unit_kg else R.string.unit_lb) },
+            onSelect = { u -> update { it.copy(weightUnit = u) } },
+        )
+
         SectionHeader(stringResource(R.string.section_storage))
         SettingRow(stringResource(R.string.storage_manage), onClick = actions.onStorage)
 

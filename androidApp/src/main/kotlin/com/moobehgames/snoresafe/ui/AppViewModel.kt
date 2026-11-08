@@ -9,6 +9,8 @@ import com.moobehgames.snoresafe.core.session.SessionSummary
 import com.moobehgames.snoresafe.core.settings.AppSettings
 import com.moobehgames.snoresafe.core.support.SupportMoment
 import com.moobehgames.snoresafe.core.support.SupportPolicy
+import com.moobehgames.snoresafe.core.tags.CustomTag
+import com.moobehgames.snoresafe.core.tags.NightLog
 import com.moobehgames.snoresafe.recording.RecordingState
 import com.moobehgames.snoresafe.recording.RecordingStateHolder
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         .map { graph.audio.all() }
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val logs: StateFlow<Map<String, NightLog>> = graph.logs.changes
+        .map { graph.logs.all() }
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    fun saveLog(log: NightLog) = io { graph.logs.save(log) }
+    fun setTonightTags(tags: Set<String>) = updateSettings { it.copy(tonightTags = tags) }
+    fun addCustomTag(tag: CustomTag) = updateSettings { it.copy(customTags = it.customTags + tag) }
+    fun deleteCustomTag(id: String) = updateSettings { s ->
+        s.copy(customTags = s.customTags.filterNot { it.id == id }, tonightTags = s.tonightTags - id)
+    }
 
     fun audioFor(sessionId: String): Flow<SessionAudio> =
         graph.audio.changes.map { graph.audio.read(sessionId) }.flowOn(Dispatchers.IO)

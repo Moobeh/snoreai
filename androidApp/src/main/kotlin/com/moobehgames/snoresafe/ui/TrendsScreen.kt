@@ -55,6 +55,8 @@ import kotlin.math.roundToInt
 @Composable
 fun TrendsScreen(
     sessions: List<SessionSummary>,
+    logs: Map<String, com.moobehgames.snoresafe.core.tags.NightLog>,
+    customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
     onOpenNight: (String) -> Unit,
     onShareReport: () -> Unit,
     modifier: Modifier = Modifier,
@@ -114,6 +116,12 @@ fun TrendsScreen(
 
             Text(stringResource(R.string.score_history), style = MaterialTheme.typography.titleMedium)
             ScoreChart(points.map { it.score })
+
+            val periodSessions = remember(sessions, period) {
+                val from = period.days?.let { today - it + 1 }
+                if (from == null) sessions else sessions.filter { Trends.nightDay(it.startEpochMs, offset) >= from }
+            }
+            WhatHelps(periodSessions, logs, customTags)
         }
 
         Text(stringResource(R.string.calendar), style = MaterialTheme.typography.titleMedium)
@@ -223,6 +231,52 @@ private fun CalendarMonth(sessions: List<SessionSummary>, offset: Long, onOpenNi
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/** Score on nights with each remedy or factor versus nights without it. */
+@Composable
+private fun WhatHelps(
+    sessions: List<SessionSummary>,
+    logs: Map<String, com.moobehgames.snoresafe.core.tags.NightLog>,
+    custom: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
+) {
+    val impacts = remember(sessions, logs) { com.moobehgames.snoresafe.core.tags.TagImpacts.compute(sessions, logs) }
+    Text(stringResource(R.string.what_helps), style = MaterialTheme.typography.titleMedium)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (impacts.isEmpty()) {
+                Text(stringResource(R.string.what_helps_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            impacts.forEach { impact ->
+                val name = tagName(impact.tagId, custom) ?: return@forEach
+                val change = impact.change.roundToInt()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(name, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            stringResource(
+                                R.string.impact_line,
+                                impact.averageWith.roundToInt().toString(),
+                                impact.averageWithout.roundToInt().toString(),
+                                impact.nightsWith,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        if (change > 0) "+$change" else change.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = when {
+                            change < 0 -> com.moobehgames.snoresafe.ui.theme.BandColors.light
+                            change > 0 -> com.moobehgames.snoresafe.ui.theme.BandColors.epic
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
                 }
             }
         }

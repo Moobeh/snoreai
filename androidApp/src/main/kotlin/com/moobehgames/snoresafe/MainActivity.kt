@@ -108,6 +108,9 @@ class MainActivity : ComponentActivity() {
         val sessions by vm.sessions.collectAsStateWithLifecycle()
         val settings by vm.settings.collectAsStateWithLifecycle()
         val supportCard by vm.supportCard.collectAsStateWithLifecycle()
+        val logs by vm.logs.collectAsStateWithLifecycle()
+        // Which tag set the picker is editing: "tonight", or a night's session id.
+        var pickTagsFor by remember { mutableStateOf<String?>(null) }
         val stack = rememberSaveable(saver = listSaver<SnapshotStateList<String>, String>({ it.toList() }, { it.toMutableStateList() })) {
             mutableStateListOf("home")
         }
@@ -181,6 +184,9 @@ class MainActivity : ComponentActivity() {
                             permissionDenied = permissionDenied,
                             startDelayMinutes = settings.startDelayMinutes,
                             showSupportCard = supportCard,
+                            tonightTags = settings.tonightTags,
+                            customTags = settings.customTags,
+                            onEditTonight = { pickTagsFor = "tonight" },
                             onStart = {
                                 if (hasMic()) RecordingService.start(this) else {
                                     startAfterGrant = true
@@ -192,7 +198,7 @@ class MainActivity : ComponentActivity() {
                             onDismissSupport = vm::dismissSupportCard,
                             modifier = m,
                         )
-                        "trends" -> TrendsScreen(sessions, onOpenNight = { go("night:$it") }, onShareReport = data.shareTrendReport, modifier = m)
+                        "trends" -> TrendsScreen(sessions, logs, settings.customTags, onOpenNight = { go("night:$it") }, onShareReport = data.shareTrendReport, modifier = m)
                         else -> SettingsScreen(
                             settings, vm::updateSettings,
                             SettingsActions(
@@ -224,6 +230,11 @@ class MainActivity : ComponentActivity() {
                                 ResultsScreen(
                                     session = session,
                                     audio = audio,
+                                    log = logs[id] ?: com.moobehgames.snoresafe.core.tags.NightLog(id),
+                                    customTags = settings.customTags,
+                                    weightUnit = settings.weightUnit,
+                                    onSaveLog = vm::saveLog,
+                                    onEditTags = { pickTagsFor = id },
                                     player = vm.player,
                                     showTutorial = !settings.resultsTutorialSeen,
                                     clipFile = { vm.clipFile(id, it.fileName) },
@@ -264,6 +275,22 @@ class MainActivity : ComponentActivity() {
             }
 
             data.Dialogs()
+
+            pickTagsFor?.let { target ->
+                val current = if (target == "tonight") settings.tonightTags else logs[target]?.tags.orEmpty()
+                com.moobehgames.snoresafe.ui.TagPickerDialog(
+                    selected = current,
+                    custom = settings.customTags,
+                    onAddCustom = vm::addCustomTag,
+                    onDeleteCustom = vm::deleteCustomTag,
+                    onDismiss = { pickTagsFor = null },
+                    onDone = { picked ->
+                        if (target == "tonight") vm.setTonightTags(picked)
+                        else vm.saveLog((logs[target] ?: com.moobehgames.snoresafe.core.tags.NightLog(target)).copy(tags = picked))
+                        pickTagsFor = null
+                    },
+                )
+            }
 
             (recording as? RecordingState.Failed)?.let { failed ->
                 AlertDialog(
@@ -353,7 +380,17 @@ class MainActivity : ComponentActivity() {
             background {
                 exporting {
                     val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
-                    val csv = CsvExport.sessions(appGraph.sessions.all()) { fmt.format(Date(it)) }
+                    val allLogs = appGraph.logs.all()
+                    val custom = appGraph.settings.current.customTags
+                    val csv = CsvExport.sessions(appGraph.sessions.all(), { fmt.format(Date(it)) }) { s ->
+                        val log = allLogs[s.id] ?: return@sessions CsvExport.Extras()
+                        CsvExport.Extras(
+                            tags = log.tags.mapNotNull { com.moobehgames.snoresafe.ui.tagName(this@MainActivity, it, custom) }.joinToString("; "),
+                            restRating = log.restRating,
+                            weightKg = log.weightKg,
+                            note = log.note,
+                        )
+                    }
                     contentResolver.openOutputStream(uri, "w")!!.use { it.write(csv.toByteArray()) }
                 }
             }
@@ -384,7 +421,10 @@ class MainActivity : ComponentActivity() {
                 scope.launch {
                     val files = withContext(Dispatchers.IO) {
                         val dir = sharedDir()
-                        val pdf = PdfReport.night(this@MainActivity, session, File(dir, "SnoreSafe-night-${stamp()}.pdf"))
+                        val log = appGraph.logs.get(session.id)
+                        val custom = appGraph.settings.current.customTags
+                        val tagNames = log.tags.mapNotNull { com.moobehgames.snoresafe.ui.tagName(this@MainActivity, it, custom) }
+                        val pdf = PdfReport.night(this@MainActivity, session, File(dir, "SnoreSafe-night-${stamp()}.pdf"), tagNames, log.note)
                         // Copies only the pinned clips into the share folder; the rest of the audio stays private.
                         val clips = audio?.clips?.filter { it.pinned }.orEmpty().mapNotNull { clip ->
                             val src = appGraph.audio.fileFor(session.id, clip)

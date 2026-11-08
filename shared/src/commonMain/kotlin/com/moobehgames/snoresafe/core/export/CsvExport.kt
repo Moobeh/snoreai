@@ -10,9 +10,17 @@ object CsvExport {
     private val HEADER = listOf(
         "start", "end", "time_in_bed_min", "monitored_min", "snoring_min", "snoring_percent", "snore_score",
         "light_percent", "loud_percent", "epic_percent", "interruptions", "notable_sounds", "other_sounds", "recovered",
+        "remedies_and_factors", "rest_rating", "weight_kg", "notes",
     )
 
-    fun sessions(sessions: List<SessionSummary>, formatTime: (Long) -> String): String = buildString {
+    /** [extras] supplies the user's own additions per night: tag names, rest rating, weight, notes. */
+    class Extras(val tags: String = "", val restRating: Int? = null, val weightKg: Float? = null, val note: String = "")
+
+    fun sessions(
+        sessions: List<SessionSummary>,
+        formatTime: (Long) -> String,
+        extras: (SessionSummary) -> Extras = { Extras() },
+    ): String = buildString {
         appendLine(HEADER.joinToString(","))
         for (s in sessions.sortedBy { it.startEpochMs }) {
             val notable = s.soundEvents.filter { it.sound.notable }.groupingBy { it.sound }.eachCount()
@@ -33,6 +41,10 @@ object CsvExport {
                     notable.entries.joinToString("; ") { "${label(it.key)} x${it.value}" },
                     other.joinToString("; ") { "${label(it.key)} ${minutes(it.value)}m" },
                     (s.endReason.name == "RECOVERED").toString(),
+                ).plus(
+                    extras(s).let { x ->
+                        listOf(x.tags, x.restRating?.toString() ?: "", x.weightKg?.let { oneDecimal(it) } ?: "", x.note.replace('\n', ' '))
+                    },
                 ).joinToString(",") { escape(it) },
             )
         }

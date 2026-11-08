@@ -40,7 +40,7 @@ object PdfReport {
         val disclaimer = context.getString(R.string.medical_disclaimer)
     }
 
-    fun night(context: Context, s: SessionSummary, out: File): File {
+    fun night(context: Context, s: SessionSummary, out: File, tags: List<String> = emptyList(), note: String = ""): File {
         val doc = PdfDocument()
         val page = doc.startPage(PdfDocument.PageInfo.Builder(W, H, 1).create())
         val c = page.canvas
@@ -63,6 +63,17 @@ object PdfReport {
         )
         rows.forEach { (k, v) -> c.drawText(k, M, y, p.body); c.drawText(v, M + 160, y, p.body); y += 16 }
         y += 16
+
+        if (tags.isNotEmpty()) {
+            c.drawText(context.getString(R.string.remedies_and_factors), M, y, p.h2); y += 16
+            wrap(tags.joinToString(", "), p.body, W - 2 * M).forEach { c.drawText(it, M, y, p.body); y += 14 }
+            y += 6
+        }
+        if (note.isNotBlank()) {
+            c.drawText(context.getString(R.string.notes), M, y, p.h2); y += 16
+            wrap(note.replace('\n', ' '), p.body, W - 2 * M).take(4).forEach { c.drawText(it, M, y, p.body); y += 14 }
+            y += 6
+        }
 
         c.drawText(context.getString(R.string.timeline), M, y, p.h2); y += 10
         drawTimeline(c, s, M, y, W - 2 * M, 90f, p); y += 104
