@@ -2,9 +2,16 @@
 <resources>
     <string name="app_name">SnoreSafe</string>
 
+    <!-- Navigation -->
+    <string name="nav_tonight">Tonight</string>
+    <string name="nav_trends">Trends</string>
+    <string name="nav_settings">Settings</string>
+    <string name="back">Back</string>
+
     <!-- Home -->
     <string name="home_tagline">Private snore tracking. Nothing leaves your phone.</string>
     <string name="start_session">Start sleep session</string>
+    <string name="start_session_delayed">Start (listening in %1$d min)</string>
     <string name="past_nights">Past nights</string>
     <string name="no_sessions">No nights recorded yet. Put your phone by the bed, plug it in and tap start.</string>
     <string name="permission_needed">SnoreSafe needs the microphone to hear snoring. Audio is analysed on this phone and never uploaded.</string>
@@ -17,8 +24,11 @@
     <!-- Recording -->
     <string name="recording_listening">Listening</string>
     <string name="recording_paused">Paused</string>
+    <string name="recording_paused_until">Paused · resumes at %1$s</string>
     <string name="recording_starting">Starting…</string>
+    <string name="recording_waiting">Listening starts at %1$s</string>
     <string name="recording_snoring_now">Snoring detected</string>
+    <string name="recording_heard">Heard: %1$s</string>
     <string name="recording_elapsed">Elapsed</string>
     <string name="recording_score_so_far">Score so far</string>
     <string name="pause">Pause</string>
@@ -38,26 +48,219 @@
     <string name="band_loud">Loud</string>
     <string name="band_epic">Epic</string>
     <string name="timeline">Night timeline</string>
+    <string name="timeline_hint">Tap the timeline to hear that moment.</string>
     <string name="other_sounds">Other sounds heard</string>
+    <string name="notable_sounds">Worth knowing</string>
+    <string name="sound_count">%1$d× · %2$s</string>
+    <string name="recordings">Recordings</string>
+    <string name="no_recordings">No recordings for this night.</string>
+    <string name="recordings_snores">Snoring</string>
+    <string name="recordings_sounds">Other sounds</string>
+    <string name="recordings_full_night">Full night</string>
+    <string name="clip_play">Play</string>
+    <string name="clip_pause">Pause</string>
+    <string name="clip_pin">Pin</string>
+    <string name="clip_unpin">Unpin</string>
+    <string name="clip_delete">Delete recording</string>
+    <string name="clip_delete_confirm_body">This recording will be deleted. This can\'t be undone.</string>
+    <string name="nothing_to_play">No recording at that moment.</string>
     <string name="interruptions">Interruptions</string>
     <string name="interruption_item">Monitoring stopped %1$s – %2$s</string>
     <string name="recovered_note">SnoreSafe was stopped by your phone during the night. Results cover the time up to %1$s. Check the battery settings on the home screen.</string>
-    <string name="back">Back</string>
+    <string name="protect_night">Keep this night\'s audio</string>
+    <string name="protect_night_desc">Protected nights are never cleaned up automatically.</string>
+    <string name="share_report">Share report</string>
+    <string name="share_report_with_clips">Share report with pinned recordings</string>
     <string name="delete">Delete</string>
     <string name="delete_confirm_title">Delete this night?</string>
-    <string name="delete_confirm_body">This can\'t be undone.</string>
+    <string name="delete_confirm_body">The night and all its recordings will be deleted. This can\'t be undone.</string>
     <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
     <string name="percent_value">%1$d%%</string>
+    <string name="tutorial_title">Reading your night</string>
+    <string name="tutorial_body">The Snore Score measures how loud and how long you snored, per hour monitored. Under 10 is quiet; 10–40 is moderate; over 40 is a lot. Compare nights to see what helps. Light, loud and epic show how much of the night you spent at each level.</string>
+    <string name="got_it">Got it</string>
 
-    <string name="sound_speech">Talking</string>
+    <!-- Sounds -->
+    <string name="sound_speech">Sleep talking or speech</string>
+    <string name="sound_shouting">Shouting</string>
+    <string name="sound_laughter">Laughter</string>
+    <string name="sound_crying">Crying</string>
+    <string name="sound_baby">Baby crying</string>
     <string name="sound_cough">Coughing or sneezing</string>
     <string name="sound_breathing">Heavy breathing</string>
+    <string name="sound_body">Body sounds</string>
     <string name="sound_pet">Pets</string>
+    <string name="sound_birds">Birds</string>
+    <string name="sound_insects">Insects</string>
     <string name="sound_fan_or_ac">Fan or air conditioning</string>
+    <string name="sound_appliance">Appliance</string>
     <string name="sound_traffic">Traffic</string>
+    <string name="sound_emergency_siren">Siren</string>
+    <string name="sound_car_alarm">Car alarm</string>
+    <string name="sound_smoke_alarm">Smoke or fire alarm</string>
+    <string name="sound_alarm">Alarm or buzzer</string>
+    <string name="sound_phone">Phone ringing</string>
+    <string name="sound_doorbell">Doorbell or knocking</string>
+    <string name="sound_door">Door</string>
+    <string name="sound_footsteps">Footsteps</string>
+    <string name="sound_water">Water or toilet</string>
+    <string name="sound_glass">Breaking glass</string>
+    <string name="sound_bang">Bang or fireworks</string>
+    <string name="sound_aircraft">Aircraft</string>
+    <string name="sound_train">Train</string>
     <string name="sound_media">TV or music</string>
-    <string name="sound_rain">Rain or storm</string>
-    <string name="sound_baby">Baby</string>
+    <string name="sound_rain">Rain</string>
+    <string name="sound_thunder">Thunder</string>
+    <string name="sound_wind">Wind</string>
+
+    <!-- Trends -->
+    <string name="trends_title">Trends</string>
+    <string name="period_week">Week</string>
+    <string name="period_month">Month</string>
+    <string name="period_quarter">3 months</string>
+    <string name="period_year">Year</string>
+    <string name="period_all">All</string>
+    <string name="avg_score">Average score</string>
+    <string name="avg_snoring">Snoring</string>
+    <string name="avg_loud_epic">Loud or epic</string>
+    <string name="avg_time_in_bed">Time in bed</string>
+    <string name="nights_count">Nights</string>
+    <string name="change_down">%1$s lower than the previous period</string>
+    <string name="change_up">%1$s higher than the previous period</string>
+    <string name="change_same">Same as the previous period</string>
+    <string name="score_history">Snore Score by night</string>
+    <string name="calendar">Calendar</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
+    <string name="no_trend_data">Record a few nights to see trends.</string>
+    <string name="share_trend_report">Share trend report (PDF)</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="section_detection">Detection</string>
+    <string name="sensitivity">Sensitivity</string>
+    <string name="sensitivity_desc">Higher catches quieter, less certain snoring.</string>
+    <string name="volume_offset">Volume adjustment</string>
+    <string name="volume_offset_desc">Shifts all levels if your phone\'s microphone reads too quiet or too loud.</string>
+    <string name="db_value">%1$+d dB</string>
+    <string name="count_light">Count light snoring</string>
+    <string name="count_light_desc">Turn off to ignore light snoring and heavy breathing.</string>
+    <string name="section_recording">Recording</string>
+    <string name="recording_mode">Recording mode</string>
+    <string name="mode_snore_clips">Best clips only</string>
+    <string name="mode_snore_clips_desc">The loudest snores and clearest other sounds. Uses least space.</string>
+    <string name="mode_all_snoring">All snoring</string>
+    <string name="mode_all_snoring_desc">A clip of every snore and every other sound.</string>
+    <string name="mode_full_night">Full night</string>
+    <string name="mode_full_night_desc">The whole night plus clips. About 15 MB per hour.</string>
+    <string name="save_other_clips">Record other sounds</string>
+    <string name="save_other_clips_desc">Keep clips of alarms, a crying baby, talking and other sounds.</string>
+    <string name="start_delay">Start delay</string>
+    <string name="auto_resume">Pause ends after</string>
+    <string name="minutes_value">%1$d min</string>
+    <string name="none">None</string>
+    <string name="never">Never</string>
+    <string name="section_storage">Storage</string>
+    <string name="storage_manage">Manage audio storage</string>
+    <string name="section_data">Your data</string>
+    <string name="backup_create">Back up to a file</string>
+    <string name="backup_create_desc">An encrypted file with all nights and recordings, saved wherever you choose.</string>
+    <string name="backup_restore">Restore from a backup</string>
+    <string name="export_csv">Export nights (CSV spreadsheet)</string>
+    <string name="export_json">Export nights (JSON)</string>
+    <string name="section_support">Support SnoreSafe</string>
+    <string name="section_help">Help</string>
+    <string name="faq">Questions and answers</string>
+    <string name="privacy">Privacy</string>
+    <string name="show_intro">Show the introduction again</string>
+    <string name="about">About</string>
+    <string name="version_value">Version %1$s</string>
+    <string name="licences">Open-source licences</string>
+    <string name="licences_body">SnoreSafe uses the YAMNet sound model, LiteRT, AndroidX, Jetpack Compose, Kotlin and kotlinx libraries, all under the Apache License 2.0.</string>
+
+    <!-- Backup -->
+    <string name="backup_password_title">Choose a backup password</string>
+    <string name="backup_password_body">The backup is encrypted with this password. Without it the file can\'t be opened, and it can\'t be recovered if you forget it.</string>
+    <string name="restore_password_title">Backup password</string>
+    <string name="password">Password</string>
+    <string name="password_confirm">Repeat password</string>
+    <string name="password_too_short">Use at least 8 characters.</string>
+    <string name="password_mismatch">The passwords don\'t match.</string>
+    <string name="working">Working…</string>
+    <string name="backup_done">Backup saved.</string>
+    <string name="backup_failed">Backup failed: %1$s</string>
+    <string name="restore_failed">Couldn\'t restore. Check the password and that the file is a SnoreSafe backup.</string>
+    <string name="export_done">Export saved.</string>
+    <string name="export_failed">Export failed: %1$s</string>
+
+    <!-- Storage -->
+    <string name="storage_title">Audio storage</string>
+    <string name="storage_used">%1$s used by recordings</string>
+    <string name="storage_free">%1$s free on this phone</string>
+    <string name="storage_limit">Storage limit</string>
+    <string name="keep_all_nights">Keep all audio for the last</string>
+    <string name="clips_older">Clips kept for older nights</string>
+    <string name="storage_rules">Pinned recordings and protected nights are always kept. When the limit is reached, the oldest recordings go first.</string>
+    <string name="clean_up_now">Clean up now</string>
+    <string name="nights_with_audio">Nights with audio</string>
+    <string name="delete_audio">Delete audio</string>
+    <string name="delete_audio_confirm_title">Delete this night\'s audio?</string>
+    <string name="delete_audio_confirm_body">All recordings from this night will be deleted, including pinned ones. The night\'s results are kept.</string>
+    <string name="protected_label">Protected</string>
+
+    <!-- Support / tip jar -->
+    <string name="support_card_title">Enjoying SnoreSafe?</string>
+    <string name="support_card_body">It\'s free, with no ads and no data collection, made by one person. If it helps you, you can buy me a coffee.</string>
+    <string name="support_card_action">Buy me a coffee</string>
+    <string name="support_not_now">Not now</string>
+    <string name="support_title">Buy me a coffee</string>
+    <string name="support_body">SnoreSafe will always be free, with no ads, no accounts and nothing collected. If it has helped you sleep better, a tip keeps it going. Tips unlock nothing: everyone gets every feature.</string>
+    <string name="tip_coffee">A coffee</string>
+    <string name="tip_lunch">A lunch</string>
+    <string name="tip_thanks">A big thank-you</string>
+    <string name="already_supported">I\'ve already supported you</string>
+    <string name="support_thanks">Thank you! You won\'t be asked again.</string>
+    <string name="tips_unavailable">Tips are available in the Google Play version of SnoreSafe.</string>
+    <string name="tips_loading">Loading…</string>
+
+    <!-- Onboarding -->
+    <string name="onb_1_title">Welcome to SnoreSafe</string>
+    <string name="onb_1_body">Find out how much you snore, what it sounds like, and what helps. Everything is analysed on this phone. SnoreSafe has no internet access, no accounts and no ads.</string>
+    <string name="onb_2_title">How it works</string>
+    <string name="onb_2_body">At bedtime, put your phone face down by the bed, about an arm\'s length away, plugged in. Tap start. In the morning, see your Snore Score, listen to recordings, and see what other sounds were heard.</string>
+    <string name="onb_3_title">Microphone and notifications</string>
+    <string name="onb_3_body">The microphone is needed to hear snoring. A notification shows while SnoreSafe is listening, so you always know.</string>
+    <string name="onb_3_action">Allow</string>
+    <string name="onb_3_granted">Allowed</string>
+    <string name="onb_4_title">Keep it running all night</string>
+    <string name="onb_4_body">Some phones stop apps overnight to save battery. Let SnoreSafe run unrestricted so nothing is missed.</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="get_started">Get started</string>
+
+    <!-- FAQ -->
+    <string name="faq_q1">Does SnoreSafe upload my recordings?</string>
+    <string name="faq_a1">No. SnoreSafe has no internet permission, so it can\'t send anything anywhere. Recordings and results stay on your phone unless you export or share them yourself.</string>
+    <string name="faq_q2">How does SnoreSafe recognise snoring?</string>
+    <string name="faq_a2">A sound-recognition model runs on your phone and listens in short slices. It recognises snoring and about 30 other kinds of sound, such as talking, coughing, alarms, a crying baby or traffic.</string>
+    <string name="faq_q3">What is the Snore Score?</string>
+    <string name="faq_a3">Minutes of snoring per hour monitored, weighted by loudness: light counts once, loud twice and epic three times. It lets you compare nights of different lengths.</string>
+    <string name="faq_q4">Where should I put my phone?</string>
+    <string name="faq_a4">Face down on a bedside table, about an arm\'s length from your head, plugged in. Keep it in the same place each night so results are comparable.</string>
+    <string name="faq_q5">Why did my session stop during the night?</string>
+    <string name="faq_a5">Some phones stop apps to save battery. Open Battery settings from the home screen and let SnoreSafe run unrestricted. If it is stopped, SnoreSafe saves everything up to that point.</string>
+    <string name="faq_q6">It counted my partner, fan or pet as snoring.</string>
+    <string name="faq_a6">Lower the sensitivity in Settings, or turn off \"Count light snoring\". Placing the phone closer to you than to other sources also helps.</string>
+    <string name="faq_q7">How much space do recordings use?</string>
+    <string name="faq_a7">Clips are small. Full-night recording uses about 15 MB per hour. You can set a storage limit and how long audio is kept in Settings.</string>
+    <string name="faq_q8">How do I move to a new phone?</string>
+    <string name="faq_a8">Create a backup in Settings and save it somewhere you can reach from the new phone. Restore it there with the same password.</string>
+    <string name="faq_q9">Can SnoreSafe tell me if I have sleep apnea?</string>
+    <string name="faq_a9">No. SnoreSafe is a wellness tool and can\'t diagnose any condition. If you are worried about your sleep or breathing, talk to a doctor. You can share a PDF report with them.</string>
+
+    <!-- Privacy -->
+    <string name="privacy_body">SnoreSafe collects nothing.\n\n• The app has no internet permission. It cannot send data anywhere.\n• There are no accounts, ads, analytics or trackers.\n• Audio is analysed on this phone. Recordings and results are stored in the app\'s private storage, which other apps can\'t read.\n• Nothing is included in your phone\'s cloud backup or copied to a new phone automatically.\n• Data leaves the phone only when you choose to: a backup file, an export, or a report you share.\n• Tips are handled by Google Play. SnoreSafe only learns that a tip was made, nothing about you.\n• Uninstalling SnoreSafe deletes all of its data.</string>
 
     <!-- Notification -->
     <string name="channel_recording">Sleep session</string>
@@ -71,5 +274,23 @@
     <string name="error_generic">Recording stopped because of an error: %1$s</string>
     <string name="dismiss">Dismiss</string>
 
+    <!-- PDF -->
+    <string name="pdf_night_title">SnoreSafe night report</string>
+    <string name="pdf_trend_title">SnoreSafe trend report</string>
+    <string name="pdf_generated">Generated %1$s by SnoreSafe on this phone.</string>
+
     <string name="medical_disclaimer">SnoreSafe is a wellness tool, not a medical device. It does not diagnose any condition. If you are worried about your sleep or breathing, talk to a doctor.</string>
+
+    <plurals name="restore_done">
+        <item quantity="one">Restored %1$d night.</item>
+        <item quantity="other">Restored %1$d nights.</item>
+    </plurals>
+    <plurals name="nights_value">
+        <item quantity="one">%1$d night</item>
+        <item quantity="other">%1$d nights</item>
+    </plurals>
+    <plurals name="clips_value">
+        <item quantity="one">%1$d clip</item>
+        <item quantity="other">%1$d clips</item>
+    </plurals>
 </resources>

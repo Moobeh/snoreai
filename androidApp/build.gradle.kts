@@ -35,11 +35,20 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     androidResources {
         // The model is memory-mapped straight out of the APK, so it must stay uncompressed.
         noCompress += "tflite"
+    }
+
+    testOptions {
+        unitTests {
+            // Robolectric renders real Compose screens on the JVM (screenshots + smoke tests).
+            isIncludeAndroidResources = true
+            all { it.maxHeapSize = "3g" }
+        }
     }
 
     lint {
@@ -64,7 +73,15 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.litert)
+    implementation(libs.billing)
+    implementation(libs.compose.material.icons)
     debugImplementation(libs.compose.ui.tooling)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 // Privacy guarantee, enforced by the build: no variant may ship with network access
@@ -77,11 +94,17 @@ abstract class VerifyPermissionsTask : DefaultTask() {
     @get:Input
     abstract val forbidden: ListProperty<String>
 
+    /** Telemetry / analytics components, matched anywhere in the merged manifest. */
+    @get:Input
+    abstract val forbiddenComponents: ListProperty<String>
+
     @TaskAction
     fun verify() {
         val text = mergedManifest.get().asFile.readText()
         val found = forbidden.get().filter { text.contains("\"$it\"") }
         if (found.isNotEmpty()) throw GradleException("Forbidden permissions in merged manifest: $found")
+        val components = forbiddenComponents.get().filter { text.contains(it) }
+        if (components.isNotEmpty()) throw GradleException("Telemetry components in merged manifest: $components")
     }
 }
 
@@ -100,7 +123,20 @@ androidComponents {
                     "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
                 ),
             )
+            forbiddenComponents.set(
+                listOf(
+                    "com.google.android.datatransport",
+                    "com.google.firebase",
+                    "com.google.android.gms.measurement",
+                    "com.google.android.gms.ads",
+                ),
+            )
         }
         tasks.named("check") { dependsOn(check) }
     }
+}
+
+// Screen render tests need the debug-only Compose test activity; release runs the plain unit tests.
+tasks.withType<Test>().matching { it.name == "testReleaseUnitTest" }.configureEach {
+    filter.excludeTestsMatching("*ScreenshotTest")
 }

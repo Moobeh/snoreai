@@ -4,6 +4,9 @@ import com.moobehgames.snoresafe.core.analysis.FrameEvidence
 import com.moobehgames.snoresafe.core.analysis.FrameVerdict
 import com.moobehgames.snoresafe.core.analysis.NightSound
 import com.moobehgames.snoresafe.core.analysis.SnoreBand
+import com.moobehgames.snoresafe.core.analysis.SoundEvent
+import com.moobehgames.snoresafe.core.analysis.SoundEventTracker
+import com.moobehgames.snoresafe.core.settings.RecordingMode
 import kotlinx.serialization.Serializable
 import kotlin.math.max
 
@@ -30,6 +33,9 @@ data class AccumulatorState(
     val pauses: List<TimeSpan> = emptyList(),
     val pausedAtMs: Long? = null,
     val otherSoundMs: Map<NightSound, Long> = emptyMap(),
+    val openSoundEvent: SoundEvent? = null,
+    val soundEvents: List<SoundEvent> = emptyList(),
+    val recordingMode: RecordingMode = RecordingMode.DEFAULT,
     val gapThresholdMs: Long = SessionAccumulator.DEFAULT_GAP_THRESHOLD_MS,
     val algorithmVersion: Int = SessionAccumulator.ALGORITHM_VERSION,
 )
@@ -66,7 +72,10 @@ class SessionAccumulator(initial: AccumulatorState) {
         )
 
         val other = frame.otherSound
+        val step = SoundEventTracker.onFrame(s.openSoundEvent, frame, verdict.isSnore)
         state = s.copy(
+            openSoundEvent = step.open,
+            soundEvents = s.soundEvents.withEvent(step.closed),
             lastFrameEndMs = max(s.lastFrameEndMs, frame.timestampMs + duration),
             monitoredMs = s.monitoredMs + duration,
             snoringMs = s.snoringMs + if (verdict.isSnore) duration else 0L,
@@ -96,7 +105,8 @@ class SessionAccumulator(initial: AccumulatorState) {
 
     fun finish(endEpochMs: Long, reason: EndReason): SessionSummary {
         if (isPaused) resume(endEpochMs)
-        val s = state
+        val s = state.copy(openSoundEvent = null, soundEvents = state.soundEvents.withEvent(state.openSoundEvent))
+        state = s
         val chart = s.minutes.entries.sortedBy { it.key }.map { (minute, b) ->
             ChartPoint(
                 minuteIndex = minute,
@@ -118,6 +128,8 @@ class SessionAccumulator(initial: AccumulatorState) {
             interruptions = s.interruptions,
             pauses = s.pauses,
             otherSoundMs = s.otherSoundMs,
+            soundEvents = s.soundEvents,
+            recordingMode = s.recordingMode,
             endReason = reason,
             algorithmVersion = s.algorithmVersion,
         )
@@ -130,9 +142,17 @@ class SessionAccumulator(initial: AccumulatorState) {
         /** Missing audio longer than this counts as an interruption. */
         const val DEFAULT_GAP_THRESHOLD_MS = 15_000L
 
-        fun start(sessionId: String, startEpochMs: Long): SessionAccumulator =
-            SessionAccumulator(AccumulatorState(sessionId = sessionId, startEpochMs = startEpochMs, lastFrameEndMs = startEpochMs))
+        /** Keeps checkpoints small even on a very noisy night. */
+        const val MAX_SOUND_EVENTS = 2_000
+
+        fun start(sessionId: String, startEpochMs: Long, mode: RecordingMode = RecordingMode.DEFAULT): SessionAccumulator =
+            SessionAccumulator(
+                AccumulatorState(sessionId = sessionId, startEpochMs = startEpochMs, lastFrameEndMs = startEpochMs, recordingMode = mode),
+            )
     }
 }
+
+private fun List<SoundEvent>.withEvent(e: SoundEvent?): List<SoundEvent> =
+    if (e == null || size >= SessionAccumulator.MAX_SOUND_EVENTS) this else this + e
 
 private fun <K> Map<K, Long>.plusDuration(key: K, ms: Long): Map<K, Long> = this + (key to ((this[key] ?: 0L) + ms))

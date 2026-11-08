@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -43,12 +42,17 @@ import kotlin.math.roundToInt
 fun HomeScreen(
     sessions: List<SessionSummary>,
     permissionDenied: Boolean,
+    startDelayMinutes: Int,
+    showSupportCard: Boolean,
     onStart: () -> Unit,
     onOpenSession: (String) -> Unit,
+    onSupport: () -> Unit,
+    onDismissSupport: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
-            modifier = Modifier.safeDrawingPadding().padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -58,7 +62,10 @@ fun HomeScreen(
             }
             item {
                 Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                    Text(stringResource(R.string.start_session), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        if (startDelayMinutes > 0) stringResource(R.string.start_session_delayed, startDelayMinutes) else stringResource(R.string.start_session),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                 }
                 Text(
                     stringResource(R.string.placement_tip),
@@ -67,6 +74,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
+            if (showSupportCard) item { SupportCard(onSupport, onDismissSupport) }
             if (permissionDenied) item { PermissionCard() }
             item { BatteryCard() }
             item {
@@ -151,6 +159,20 @@ private fun BatteryCard() {
             TextButton(onClick = {
                 runCatching { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
             }) { Text(stringResource(R.string.battery_action)) }
+        }
+    }
+}
+
+@Composable
+private fun SupportCard(onSupport: () -> Unit, onDismiss: () -> Unit) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.support_card_title), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.support_card_body), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            Row {
+                TextButton(onClick = onSupport) { Text(stringResource(R.string.support_card_action)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.support_not_now)) }
+            }
         }
     }
 }

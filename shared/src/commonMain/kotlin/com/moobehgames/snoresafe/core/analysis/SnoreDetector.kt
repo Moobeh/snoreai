@@ -35,6 +35,8 @@ data class DetectionSettings(
     val loudCeilingDbfs: Float = -20f,
     /** Anything quieter than this is never counted as snoring. */
     val minSnoreDbfs: Float = -58f,
+    /** Off = "light-snoring filter": light snoring and heavy breathing are not counted. */
+    val countLightSnoring: Boolean = true,
 ) {
     init {
         require(sensitivity in 0f..1f) { "sensitivity must be in 0..1" }
@@ -52,6 +54,8 @@ data class FrameEvidence(
     val loudnessDbfs: Float,
     val snoreProbability: Float,
     val otherSound: NightSound? = null,
+    val otherLabel: String? = null,
+    val otherConfidence: Float = 0f,
 )
 
 data class FrameVerdict(
@@ -71,7 +75,9 @@ class SnoreDetector(private val settings: DetectionSettings = DetectionSettings(
     fun assess(frame: FrameEvidence): FrameVerdict {
         val intensity = intensityOf(frame.loudnessDbfs)
         val loudEnough = frame.loudnessDbfs + settings.volumeOffsetDb >= settings.minSnoreDbfs
-        val isSnore = loudEnough && frame.snoreProbability >= settings.probabilityThreshold
-        return FrameVerdict(isSnore, intensity, SnoreBand.of(intensity, isSnore))
+        val heard = loudEnough && frame.snoreProbability >= settings.probabilityThreshold
+        val band = SnoreBand.of(intensity, heard)
+        val isSnore = heard && (settings.countLightSnoring || band != SnoreBand.LIGHT)
+        return FrameVerdict(isSnore, intensity, if (isSnore) band else SnoreBand.QUIET)
     }
 }
