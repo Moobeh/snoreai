@@ -89,6 +89,7 @@ fun ResultsScreen(
     onShare: (withClips: Boolean) -> Unit,
     onBack: () -> Unit,
     onDelete: () -> Unit,
+    onBatteryGuide: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var confirmDelete by remember { mutableStateOf(false) }
@@ -113,7 +114,12 @@ fun ResultsScreen(
             )
 
             if (session.endReason == EndReason.RECOVERED) {
-                Card { Text(stringResource(R.string.recovered_note, formatTime(context, session.endEpochMs)), Modifier.padding(16.dp)) }
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f))) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(stringResource(R.string.recovered_note, formatTime(context, session.endEpochMs)))
+                        TextButton(onClick = onBatteryGuide) { Text(stringResource(R.string.battery_guide_how)) }
+                    }
+                }
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {

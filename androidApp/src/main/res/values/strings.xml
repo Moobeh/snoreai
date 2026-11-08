@@ -405,4 +405,52 @@
         <item quantity="one">Needs at least %1$d answer of each kind to start learning.</item>
         <item quantity="other">Needs at least %1$d answers of each kind to start learning.</item>
     </plurals>
+
+    <!-- Battery guides. Menu names vary by phone and Android version, so keep steps short and general. -->
+    <string name="battery_guide_intro">Your phone has its own battery saver that can stop apps while you sleep. These steps stop it from cutting your night short.</string>
+    <string name="battery_guide_for">For your %1$s phone</string>
+    <string name="battery_guide_note">Menu names vary between phones and Android versions. If a step doesn\'t match exactly, look for the closest option.</string>
+    <string name="battery_guide_open_app">Open SnoreSafe\'s app settings</string>
+    <string name="battery_guide_open_battery">Open battery optimisation</string>
+    <string name="battery_guide_open_maker">Open %1$s battery settings</string>
+    <string name="battery_guide_how">How to prevent this</string>
+    <string name="battery_guide_settings_row">Keep running all night</string>
+    <string name="maker_samsung">Samsung</string>
+    <string name="maker_xiaomi">Xiaomi, Redmi or POCO</string>
+    <string name="maker_huawei_honor">Huawei or Honor</string>
+    <string name="maker_oneplus_oppo_realme">OnePlus, Oppo or Realme</string>
+    <string name="maker_vivo">vivo</string>
+    <string name="maker_other">Android</string>
+    <string-array name="battery_steps_samsung">
+        <item>Open Settings → Battery → Background usage limits.</item>
+        <item>Make sure SnoreSafe isn\'t in \"Sleeping apps\" or \"Deep sleeping apps\".</item>
+        <item>Add SnoreSafe to \"Never sleeping apps\".</item>
+        <item>In Settings → Apps → SnoreSafe → Battery, choose \"Unrestricted\".</item>
+    </string-array>
+    <string-array name="battery_steps_xiaomi">
+        <item>Open Settings → Apps → Manage apps → SnoreSafe.</item>
+        <item>Turn on \"Autostart\".</item>
+        <item>Tap \"Battery saver\" and choose \"No restrictions\".</item>
+        <item>In recent apps, lock SnoreSafe (long-press it and tap the lock) so it isn\'t cleared.</item>
+    </string-array>
+    <string-array name="battery_steps_huawei_honor">
+        <item>Open Settings → Battery → App launch.</item>
+        <item>Find SnoreSafe and turn off \"Manage automatically\".</item>
+        <item>Turn on \"Auto-launch\", \"Secondary launch\" and \"Run in background\".</item>
+    </string-array>
+    <string-array name="battery_steps_oneplus_oppo_realme">
+        <item>Open Settings → Apps → SnoreSafe → Battery usage.</item>
+        <item>Turn on \"Allow background activity\" (and \"Allow auto launch\" if shown), or choose \"Unrestricted\".</item>
+        <item>In recent apps, lock SnoreSafe so it isn\'t cleared.</item>
+    </string-array>
+    <string-array name="battery_steps_vivo">
+        <item>Open Settings → Battery → Background power consumption management.</item>
+        <item>Allow SnoreSafe to run in the background.</item>
+        <item>In Settings → Apps → Autostart, allow SnoreSafe.</item>
+    </string-array>
+    <string-array name="battery_steps_other">
+        <item>Open Settings → Apps → SnoreSafe → Battery.</item>
+        <item>Choose \"Unrestricted\" (on some phones, \"Don\'t optimise\").</item>
+        <item>While SnoreSafe is listening, don\'t swipe it away from recent apps.</item>
+    </string-array>
 </resources>

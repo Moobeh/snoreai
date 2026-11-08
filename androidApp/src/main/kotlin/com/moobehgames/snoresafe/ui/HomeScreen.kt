@@ -47,6 +47,8 @@ fun HomeScreen(
     tonightTags: Set<String>,
     customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
     onEditTonight: () -> Unit,
+    batteryGuideSeen: Boolean,
+    onBatteryGuide: () -> Unit,
     onStart: () -> Unit,
     onOpenSession: (String) -> Unit,
     onSupport: () -> Unit,
@@ -80,7 +82,7 @@ fun HomeScreen(
             item { TonightCard(tonightTags, customTags, onEditTonight) }
             if (showSupportCard) item { SupportCard(onSupport, onDismissSupport) }
             if (permissionDenied) item { PermissionCard() }
-            item { BatteryCard() }
+            item { BatteryCard(batteryGuideSeen, onBatteryGuide) }
             item {
                 Text(stringResource(R.string.past_nights), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
             }
@@ -147,7 +149,7 @@ private fun PermissionCard() {
 
 /** Shown until the user exempts SnoreSafe from battery optimisation. Opens settings; asks no special permission. */
 @Composable
-private fun BatteryCard() {
+private fun BatteryCard(guideSeen: Boolean, onGuide: () -> Unit) {
     val context = LocalContext.current
     val power = remember { context.getSystemService(PowerManager::class.java) }
     var exempt by remember { mutableStateOf(true) }
@@ -155,14 +157,20 @@ private fun BatteryCard() {
         exempt = power.isIgnoringBatteryOptimizations(context.packageName)
         onPauseOrDispose { }
     }
-    if (exempt) return
+    val makerHasOwnSaver = remember { currentPhoneMaker() != com.moobehgames.snoresafe.core.device.PhoneMaker.OTHER }
+    if (exempt && (guideSeen || !makerHasOwnSaver)) return
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Column(Modifier.padding(16.dp)) {
             Text(stringResource(R.string.battery_title), style = MaterialTheme.typography.titleSmall)
             Text(stringResource(R.string.battery_body), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
-            TextButton(onClick = {
-                runCatching { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
-            }) { Text(stringResource(R.string.battery_action)) }
+            Row {
+                TextButton(onClick = onGuide) { Text(stringResource(R.string.battery_guide_how)) }
+                if (!exempt) {
+                    TextButton(onClick = {
+                        runCatching { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
+                    }) { Text(stringResource(R.string.battery_action)) }
+                }
+            }
         }
     }
 }

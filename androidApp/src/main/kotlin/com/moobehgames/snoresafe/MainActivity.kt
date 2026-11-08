@@ -187,6 +187,8 @@ class MainActivity : ComponentActivity() {
                             tonightTags = settings.tonightTags,
                             customTags = settings.customTags,
                             onEditTonight = { pickTagsFor = "tonight" },
+                            batteryGuideSeen = settings.batteryGuideSeen,
+                            onBatteryGuide = { go("battery") },
                             onStart = {
                                 if (hasMic()) RecordingService.start(this) else {
                                     startAfterGrant = true
@@ -215,6 +217,7 @@ class MainActivity : ComponentActivity() {
                                 onPrivacy = { go("privacy") },
                                 onLicences = { go("licences") },
                                 onShowIntro = { go("onboarding") },
+                                onBatteryGuide = { go("battery") },
                             ),
                             modifier = m,
                         )
@@ -249,6 +252,7 @@ class MainActivity : ComponentActivity() {
                                     onShare = { withClips -> data.shareNight(session, if (withClips) audio else null) },
                                     onBack = { vm.player.stop(); back() },
                                     onDelete = { vm.deleteNight(id); back() },
+                                    onBatteryGuide = { go("battery") },
                                 )
                             }
                         }
@@ -269,6 +273,10 @@ class MainActivity : ComponentActivity() {
                                 onAlreadySupported = { vm.markSupported(); back() },
                                 onBack = ::back,
                             )
+                        }
+                        route == "battery" -> {
+                            LaunchedEffect(Unit) { if (!settings.batteryGuideSeen) vm.updateSettings { it.copy(batteryGuideSeen = true) } }
+                            com.moobehgames.snoresafe.ui.BatteryGuideScreen(::back)
                         }
                         route == "faq" -> FaqScreen(::back)
                         route == "privacy" -> PrivacyScreen(::back)

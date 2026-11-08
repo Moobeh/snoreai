@@ -47,7 +47,7 @@ class ScreenshotTest {
     private val night = SampleData.night(0, intensity = 0.9f, seed = 11)
 
     @Test fun home() = shoot("01-home") {
-        HomeScreen(SampleData.history(), false, 0, false, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), emptyList(), noop, noop, {}, noop, noop)
+        HomeScreen(SampleData.history(), false, 0, false, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), emptyList(), noop, false, noop, noop, {}, noop, noop)
     }
 
     @Test fun results() = shoot("02-results") {
@@ -70,6 +70,14 @@ class ScreenshotTest {
     fun trendsFullPage() = shoot("x-trends-full") {
         val h = SampleData.history()
         TrendsScreen(h, SampleData.logs(h), emptyList(), {}, noop)
+    }
+
+    @Test fun batteryGuideSamsung() = shoot("x-battery-samsung") {
+        BatteryGuideScreen(noop, com.moobehgames.snoresafe.core.device.PhoneMaker.SAMSUNG)
+    }
+
+    @Test fun batteryGuideGeneral() = shoot("x-battery-general") {
+        BatteryGuideScreen(noop, com.moobehgames.snoresafe.core.device.PhoneMaker.OTHER)
     }
 
     @Test fun recording() = shoot("04-recording") {

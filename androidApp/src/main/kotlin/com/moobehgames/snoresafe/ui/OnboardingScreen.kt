@@ -1,7 +1,5 @@
 package com.moobehgames.snoresafe.ui
 
-import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -28,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +36,6 @@ import com.moobehgames.snoresafe.R
 
 @Composable
 fun OnboardingScreen(permissionsGranted: Boolean, onRequestPermissions: () -> Unit, onDone: () -> Unit) {
-    val context = LocalContext.current
     var page by rememberSaveable { mutableIntStateOf(0) }
     val pages = listOf(
         R.string.onb_1_title to R.string.onb_1_body,
@@ -53,7 +51,11 @@ fun OnboardingScreen(permissionsGranted: Boolean, onRequestPermissions: () -> Un
                 Spacer(Modifier.weight(1f))
                 if (!last) TextButton(onClick = onDone) { Text(stringResource(R.string.skip)) }
             }
-            Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 androidx.compose.foundation.Image(
                     painter = painterResource(R.drawable.ic_launcher_foreground),
                     contentDescription = null,
@@ -68,9 +70,7 @@ fun OnboardingScreen(permissionsGranted: Boolean, onRequestPermissions: () -> Un
                     2 -> OutlinedButton(onClick = onRequestPermissions, enabled = !permissionsGranted) {
                         Text(stringResource(if (permissionsGranted) R.string.onb_3_granted else R.string.onb_3_action))
                     }
-                    3 -> OutlinedButton(onClick = {
-                        runCatching { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
-                    }) { Text(stringResource(R.string.battery_action)) }
+                    3 -> BatteryGuideSteps()
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {

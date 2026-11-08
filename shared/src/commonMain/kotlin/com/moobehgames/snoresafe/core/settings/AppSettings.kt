@@ -61,6 +61,8 @@ data class AppSettings(
     val weightUnit: WeightUnit = WeightUnit.KG,
     /** Blend the model trained on this phone from the user's labels into detection. */
     val usePersonalModel: Boolean = true,
+    /** The user has opened the battery guide at least once (hides the home reminder on phones with extra savers). */
+    val batteryGuideSeen: Boolean = false,
 ) {
     init {
         require(startDelayMinutes in 0..120 && autoResumeMinutes in 0..240)

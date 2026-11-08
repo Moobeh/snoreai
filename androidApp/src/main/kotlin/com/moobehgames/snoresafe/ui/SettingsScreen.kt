@@ -40,6 +40,7 @@ class SettingsActions(
     val onPrivacy: () -> Unit,
     val onLicences: () -> Unit,
     val onShowIntro: () -> Unit,
+    val onBatteryGuide: () -> Unit = {},
 )
 
 @Composable
@@ -167,6 +168,7 @@ fun SettingsScreen(
         }
 
         SectionHeader(stringResource(R.string.section_help))
+        SettingRow(stringResource(R.string.battery_guide_settings_row), onClick = actions.onBatteryGuide)
         SettingRow(stringResource(R.string.faq), onClick = actions.onFaq)
         SettingRow(stringResource(R.string.privacy), onClick = actions.onPrivacy)
         SettingRow(stringResource(R.string.show_intro), onClick = actions.onShowIntro)
