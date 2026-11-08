@@ -200,8 +200,11 @@ class MainActivity : ComponentActivity() {
                         )
                         "trends" -> TrendsScreen(sessions, logs, settings.customTags, onOpenNight = { go("night:$it") }, onShareReport = data.shareTrendReport, modifier = m)
                         else -> SettingsScreen(
-                            settings, vm::updateSettings,
-                            SettingsActions(
+                            settings = settings,
+                            update = vm::updateSettings,
+                            labelCounts = vm.labelCounts.collectAsStateWithLifecycle().value,
+                            onResetPersonal = vm::resetPersonalModel,
+                            actions = SettingsActions(
                                 onStorage = { go("storage") },
                                 onBackup = data.backup,
                                 onRestore = data.restore,
@@ -240,6 +243,7 @@ class MainActivity : ComponentActivity() {
                                     clipFile = { vm.clipFile(id, it.fileName) },
                                     onTutorialSeen = { vm.updateSettings { it.copy(resultsTutorialSeen = true) } },
                                     onPin = { clip, pin -> vm.setPinned(id, clip.id, pin) },
+                                    onLabel = { clip, label -> vm.setLabel(id, clip, label) },
                                     onDeleteClip = { clip -> vm.player.stop(); vm.deleteClip(id, clip.id) },
                                     onProtect = { vm.setProtected(id, it) },
                                     onShare = { withClips -> data.shareNight(session, if (withClips) audio else null) },

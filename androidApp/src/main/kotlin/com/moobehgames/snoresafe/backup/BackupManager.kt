@@ -26,6 +26,8 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                 if (custom.isNotEmpty()) {
                     zip.putText(CUSTOM_TAGS, SessionCodec.encodeCustomTags(custom))
                 }
+                val labels = graph.personalModel.exportSet()
+                if (labels.isNotEmpty()) zip.putText(TRAINING_SET, SessionCodec.encodeTrainingSet(labels))
                 for (s in graph.sessions.all()) {
                     zip.putText("sessions/${s.id}.json", SessionCodec.encodeSummary(s))
                     val log = graph.logs.get(s.id)
@@ -59,7 +61,7 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                         val name = entry.name
                         if (name == MANIFEST) sawManifest = true
                         // Only exact, expected paths: no "..", no absolute paths (zip-slip safe).
-                        if (name != MANIFEST && name != CUSTOM_TAGS && !SESSION_PATH.matches(name) && !LOG_PATH.matches(name) && !AUDIO_PATH.matches(name)) continue
+                        if (name != MANIFEST && name != CUSTOM_TAGS && name != TRAINING_SET && !SESSION_PATH.matches(name) && !LOG_PATH.matches(name) && !AUDIO_PATH.matches(name)) continue
                         val target = File(staging, name)
                         target.parentFile?.mkdirs()
                         target.outputStream().use { zip.copyTo(it) }
@@ -100,6 +102,9 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
                 graph.sessions.save(summary)
                 added++
             }
+            File(staging, TRAINING_SET).takeIf { it.isFile }?.let { f ->
+                runCatching { SessionCodec.decodeTrainingSet(f.readText()) }.getOrNull()?.let { graph.personalModel.importSet(it) }
+            }
             graph.finisher.applyStorageLimits()
             return added
         } finally {
@@ -117,6 +122,7 @@ class BackupManager(private val context: Context, private val graph: AppGraph) {
     private companion object {
         const val MANIFEST = "manifest.json"
         const val CUSTOM_TAGS = "custom-tags.json"
+        const val TRAINING_SET = "personal-training-set.json"
         val LOG_PATH = Regex("logs/[A-Za-z0-9-]{1,64}\\.json")
         val SESSION_PATH = Regex("sessions/[A-Za-z0-9-]{1,64}\\.json")
         val AUDIO_PATH = Regex("audio/[A-Za-z0-9-]{1,64}/[A-Za-z0-9._-]{1,80}")

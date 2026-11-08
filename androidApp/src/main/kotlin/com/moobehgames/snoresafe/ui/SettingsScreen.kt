@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -42,7 +43,14 @@ class SettingsActions(
 )
 
 @Composable
-fun SettingsScreen(settings: AppSettings, update: ((AppSettings) -> AppSettings) -> Unit, actions: SettingsActions, modifier: Modifier = Modifier) {
+fun SettingsScreen(
+    settings: AppSettings,
+    update: ((AppSettings) -> AppSettings) -> Unit,
+    actions: SettingsActions,
+    modifier: Modifier = Modifier,
+    labelCounts: com.moobehgames.snoresafe.core.ml.PersonalTraining.LabelCounts = com.moobehgames.snoresafe.core.ml.PersonalTraining.LabelCounts(0, 0),
+    onResetPersonal: () -> Unit = {},
+) {
     androidx.compose.material3.Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Text(
@@ -71,6 +79,34 @@ fun SettingsScreen(settings: AppSettings, update: ((AppSettings) -> AppSettings)
         )
         SwitchRow(stringResource(R.string.count_light), stringResource(R.string.count_light_desc), settings.detection.countLightSnoring) { on ->
             update { it.copy(detection = it.detection.copy(countLightSnoring = on)) }
+        }
+
+        SectionHeader(stringResource(R.string.section_personal))
+        SwitchRow(stringResource(R.string.personal_use), stringResource(R.string.personal_use_desc), settings.usePersonalModel) { on ->
+            update { it.copy(usePersonalModel = on) }
+        }
+        Text(
+            if (labelCounts.enoughToTrain) {
+                stringResource(R.string.personal_status_trained, labelCounts.total, labelCounts.snoring, labelCounts.notSnoring)
+            } else {
+                stringResource(R.string.personal_status_needs, labelCounts.snoring, labelCounts.notSnoring, com.moobehgames.snoresafe.core.ml.PersonalHead.MIN_EXAMPLES_PER_CLASS)
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        if (labelCounts.total > 0) {
+            var confirmReset by remember { mutableStateOf(false) }
+            SettingRow(stringResource(R.string.personal_reset), onClick = { confirmReset = true })
+            if (confirmReset) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { confirmReset = false },
+                    title = { Text(stringResource(R.string.personal_reset)) },
+                    text = { Text(stringResource(R.string.personal_reset_body)) },
+                    confirmButton = { androidx.compose.material3.TextButton(onClick = { onResetPersonal(); confirmReset = false }) { Text(stringResource(R.string.delete)) } },
+                    dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmReset = false }) { Text(stringResource(R.string.cancel)) } },
+                )
+            }
         }
 
         SectionHeader(stringResource(R.string.section_recording))

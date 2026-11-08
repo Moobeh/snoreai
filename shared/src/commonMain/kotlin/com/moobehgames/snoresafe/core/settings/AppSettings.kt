@@ -59,6 +59,8 @@ data class AppSettings(
     val tonightTags: Set<String> = emptySet(),
     val customTags: List<CustomTag> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
+    /** Blend the model trained on this phone from the user's labels into detection. */
+    val usePersonalModel: Boolean = true,
 ) {
     init {
         require(startDelayMinutes in 0..120 && autoResumeMinutes in 0..240)

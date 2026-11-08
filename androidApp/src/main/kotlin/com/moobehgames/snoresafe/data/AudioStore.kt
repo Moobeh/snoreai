@@ -49,6 +49,10 @@ class AudioStore(private val root: File) {
         write(read(sessionId).let { a -> a.copy(clips = a.clips.map { if (it.id == clipId) it.copy(pinned = pinned) else it }) })
 
     @Synchronized
+    fun setUserLabel(sessionId: String, clipId: String, label: com.moobehgames.snoresafe.core.audio.ClipLabel?) =
+        write(read(sessionId).let { a -> a.copy(clips = a.clips.map { if (it.id == clipId) it.copy(userLabel = label) else it }) })
+
+    @Synchronized
     fun setProtected(sessionId: String, protected: Boolean) = write(read(sessionId).copy(protected = protected))
 
     @Synchronized

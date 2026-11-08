@@ -380,4 +380,20 @@
     <string name="what_helps_empty">Tag a few nights with remedies and factors, with and without each one, to see what changes your score.</string>
     <string name="impact_line">%1$s vs %2$s without · %3$d nights</string>
     <string name="save">Save</string>
+
+    <!-- Personal model -->
+    <string name="label_menu">Is this snoring?</string>
+    <string name="label_snoring">Yes, snoring</string>
+    <string name="label_not_snoring">No, not snoring</string>
+    <string name="label_clear">Clear my answer</string>
+    <string name="labelled_snoring">You said: snoring</string>
+    <string name="labelled_not_snoring">You said: not snoring</string>
+    <string name="section_personal">Personal model</string>
+    <string name="personal_use">Learn from my answers</string>
+    <string name="personal_use_desc">Mark recordings as snoring or not, and SnoreSafe learns your bedroom: your snore, your partner, your fan. Trained and kept only on this phone.</string>
+    <string name="personal_status_trained">Learned from %1$d answers (%2$d snoring, %3$d not snoring).</string>
+    <string name="personal_status_needs">%1$d snoring and %2$d not-snoring answers so far. Needs at least %3$d of each to start learning.</string>
+    <string name="personal_reset">Forget what it has learned</string>
+    <string name="personal_reset_body">All your answers and the personal model will be deleted. Detection goes back to the standard model.</string>
+    <string name="labels_hint">Tip: tell SnoreSafe which recordings are really snoring to make it more accurate for you.</string>
 </resources>

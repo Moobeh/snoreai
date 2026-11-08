@@ -51,13 +51,13 @@ class ScreenshotTest {
     }
 
     @Test fun results() = shoot("02-results") {
-        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), false, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
+        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), false, { File("x") }, noop, { _, _ -> }, { _, _ -> }, {}, {}, {}, noop, noop)
     }
 
     /** Whole results page in one tall image, to check the lower sections render. Not a store screenshot. */
-    @Test @Config(qualifiers = "w360dp-h2000dp-port-night-xxhdpi")
+    @Test @Config(qualifiers = "w360dp-h2700dp-port-night-xxhdpi")
     fun resultsFullPage() = shoot("x-results-full") {
-        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), true, { File("x") }, noop, { _, _ -> }, {}, {}, {}, noop, noop)
+        ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), true, { File("x") }, noop, { _, _ -> }, { _, _ -> }, {}, {}, {}, noop, noop)
     }
 
     @Test fun trends() = shoot("03-trends") {

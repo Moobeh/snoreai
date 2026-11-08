@@ -27,6 +27,11 @@ object SessionCodec {
     fun decodeCustomTags(text: String): List<com.moobehgames.snoresafe.core.tags.CustomTag> =
         json.decodeFromString(kotlinx.serialization.builtins.ListSerializer(com.moobehgames.snoresafe.core.tags.CustomTag.serializer()), text)
 
+    fun encodeTrainingSet(set: List<com.moobehgames.snoresafe.core.ml.TrainingExample>): String =
+        json.encodeToString(kotlinx.serialization.builtins.ListSerializer(com.moobehgames.snoresafe.core.ml.TrainingExample.serializer()), set)
+    fun decodeTrainingSet(text: String): List<com.moobehgames.snoresafe.core.ml.TrainingExample> =
+        json.decodeFromString(kotlinx.serialization.builtins.ListSerializer(com.moobehgames.snoresafe.core.ml.TrainingExample.serializer()), text)
+
     fun encodeLog(log: NightLog): String = json.encodeToString(NightLog.serializer(), log)
     fun decodeLog(text: String): NightLog = json.decodeFromString(NightLog.serializer(), text)
 

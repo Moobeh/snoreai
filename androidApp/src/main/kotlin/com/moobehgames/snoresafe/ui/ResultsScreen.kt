@@ -19,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -81,6 +83,7 @@ fun ResultsScreen(
     clipFile: (AudioClip) -> java.io.File,
     onTutorialSeen: () -> Unit,
     onPin: (AudioClip, Boolean) -> Unit,
+    onLabel: (AudioClip, com.moobehgames.snoresafe.core.audio.ClipLabel?) -> Unit,
     onDeleteClip: (AudioClip) -> Unit,
     onProtect: (Boolean) -> Unit,
     onShare: (withClips: Boolean) -> Unit,
@@ -153,7 +156,7 @@ fun ResultsScreen(
 
             SoundsSection(session, audio, playing, ::play)
 
-            RecordingsSection(audio, playing, ::play, onPin) { confirmClipDelete = it }
+            RecordingsSection(audio, playing, ::play, onPin, onLabel) { confirmClipDelete = it }
 
             if (session.interruptions.isNotEmpty()) {
                 Text(stringResource(R.string.interruptions), style = MaterialTheme.typography.titleMedium)
@@ -266,6 +269,7 @@ private fun RecordingsSection(
     playing: ClipPlayer.State,
     play: (AudioClip, Long?) -> Unit,
     onPin: (AudioClip, Boolean) -> Unit,
+    onLabel: (AudioClip, com.moobehgames.snoresafe.core.audio.ClipLabel?) -> Unit,
     onDelete: (AudioClip) -> Unit,
 ) {
     val context = LocalContext.current
@@ -273,6 +277,9 @@ private fun RecordingsSection(
     if (audio.clips.isEmpty()) {
         Text(stringResource(R.string.no_recordings), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
+    }
+    if (audio.clips.none { it.userLabel != null } && audio.clips.any { it.kind == ClipKind.SNORE }) {
+        Text(stringResource(R.string.labels_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     val groups = listOf(
         R.string.recordings_snores to audio.clips.filter { it.kind == ClipKind.SNORE }.sortedByDescending { it.peak },
@@ -301,10 +308,18 @@ private fun RecordingsSection(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            clip.userLabel?.let {
+                                Text(
+                                    stringResource(if (it == com.moobehgames.snoresafe.core.audio.ClipLabel.SNORING) R.string.labelled_snoring else R.string.labelled_not_snoring),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                         if (clip.kind == ClipKind.SNORE) {
                             Box(Modifier.size(10.dp).background(BandColors.of(SnoreBand.of(clip.peak, true)), CircleShape))
                         }
+                        if (clip.kind != ClipKind.SEGMENT && clip.features != null) LabelButton(clip) { onLabel(clip, it) }
                         IconButton(onClick = { onPin(clip, !clip.pinned) }) {
                             Icon(
                                 if (clip.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
@@ -396,6 +411,28 @@ private fun Timeline(session: SessionSummary, audio: SessionAudio, onTap: (Long)
         session.soundEvents.filter { it.sound.notable }.forEach { e ->
             val x = (e.startEpochMs - session.startEpochMs) / span * size.width
             drawCircle(notableMark, radius = 4f, center = Offset(x, 12f))
+        }
+    }
+}
+
+@Composable
+private fun LabelButton(clip: AudioClip, onLabel: (com.moobehgames.snoresafe.core.audio.ClipLabel?) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }) {
+            Icon(
+                if (clip.userLabel == null) Icons.AutoMirrored.Filled.HelpOutline else Icons.Filled.CheckCircle,
+                contentDescription = stringResource(R.string.label_menu),
+                tint = if (clip.userLabel == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+            )
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            Text(stringResource(R.string.label_menu), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            DropdownMenuItem(text = { Text(stringResource(R.string.label_snoring)) }, onClick = { open = false; onLabel(com.moobehgames.snoresafe.core.audio.ClipLabel.SNORING) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.label_not_snoring)) }, onClick = { open = false; onLabel(com.moobehgames.snoresafe.core.audio.ClipLabel.NOT_SNORING) })
+            if (clip.userLabel != null) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.label_clear)) }, onClick = { open = false; onLabel(null) })
+            }
         }
     }
 }

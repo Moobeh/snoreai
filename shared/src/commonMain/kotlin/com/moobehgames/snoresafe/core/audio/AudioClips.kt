@@ -16,6 +16,10 @@ enum class ClipKind {
     SEGMENT,
 }
 
+/** What the user says a recording is. Trains the personal model. */
+@Serializable
+enum class ClipLabel { SNORING, NOT_SNORING }
+
 @Serializable
 data class AudioClip(
     val id: String,
@@ -31,6 +35,7 @@ data class AudioClip(
     val pinned: Boolean = false,
     /** Mean classifier scores over the clip, kept for on-device personalisation. */
     val features: List<Float>? = null,
+    val userLabel: ClipLabel? = null,
 ) {
     val endEpochMs: Long get() = startEpochMs + durationMs
 

@@ -78,6 +78,16 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun deleteNightAudio(id: String) = io { graph.audio.deleteSession(id) }
     fun setPinned(sessionId: String, clipId: String, pinned: Boolean) = io { graph.audio.setPinned(sessionId, clipId, pinned) }
     fun deleteClip(sessionId: String, clipId: String) = io { graph.audio.deleteClips(sessionId, setOf(clipId)) }
+    val personalModel = graph.personalModel.weights
+    val labelCounts = graph.personalModel.counts
+
+    /** Labels a recording and retrains the personal model straight away. */
+    fun setLabel(sessionId: String, clip: com.moobehgames.snoresafe.core.audio.AudioClip, label: com.moobehgames.snoresafe.core.audio.ClipLabel?) = io {
+        graph.personalModel.label(sessionId, clip, label)
+    }
+
+    fun resetPersonalModel() = io { graph.personalModel.reset() }
+
     fun setProtected(sessionId: String, protected: Boolean) = io { graph.audio.setProtected(sessionId, protected) }
 
     // --- Support card -------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import android.content.Context
 import com.moobehgames.snoresafe.data.AudioStore
 import com.moobehgames.snoresafe.data.CheckpointStore
 import com.moobehgames.snoresafe.data.LogStore
+import com.moobehgames.snoresafe.data.PersonalModelStore
 import com.moobehgames.snoresafe.data.SessionFileStore
 import com.moobehgames.snoresafe.data.SettingsStore
 import com.moobehgames.snoresafe.recording.NightFinisher
@@ -32,6 +33,7 @@ class AppGraph(context: Context) {
     val sessions = SessionFileStore(File(context.filesDir, "sessions"))
     val audio = AudioStore(File(context.filesDir, "audio"))
     val logs = LogStore(File(context.filesDir, "logs"))
+    val personalModel = PersonalModelStore(File(context.filesDir, "personal"), audio)
     val checkpoints = CheckpointStore(File(context.filesDir, "active-session.json"))
     val finisher = NightFinisher(sessions, audio, settings, logs)
     val recovery = SessionRecovery(checkpoints, finisher)

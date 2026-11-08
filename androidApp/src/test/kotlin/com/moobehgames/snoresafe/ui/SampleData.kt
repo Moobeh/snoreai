@@ -74,7 +74,7 @@ object SampleData {
 
     fun audio(s: SessionSummary): SessionAudio {
         fun clip(id: String, kind: ClipKind, minute: Int, peak: Float, sound: NightSound? = null, pinned: Boolean = false) =
-            AudioClip(id, kind, s.startEpochMs + minute * MIN, 14_000, "$id.m4a", 60_000, peak, sound, sound?.name, pinned)
+            AudioClip(id, kind, s.startEpochMs + minute * MIN, 14_000, "$id.m4a", 60_000, peak, sound, sound?.name, pinned, features = listOf(0.1f), userLabel = if (id == "s1") com.moobehgames.snoresafe.core.audio.ClipLabel.SNORING else null)
         return SessionAudio(
             s.id,
             listOf(

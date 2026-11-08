@@ -20,6 +20,7 @@ import com.moobehgames.snoresafe.core.analysis.FrameEvidence
 import com.moobehgames.snoresafe.core.analysis.Loudness
 import com.moobehgames.snoresafe.core.analysis.SnoreDetector
 import com.moobehgames.snoresafe.core.analysis.SoundTaxonomy
+import com.moobehgames.snoresafe.core.ml.PersonalTraining
 import com.moobehgames.snoresafe.core.session.EndReason
 import com.moobehgames.snoresafe.core.session.SessionAccumulator
 import com.moobehgames.snoresafe.data.freeBytes
@@ -105,6 +106,8 @@ class RecordingService : Service() {
             classifier.use { model ->
                 val taxonomy = SoundTaxonomy(model.labels)
                 val detector = SnoreDetector(settings.detection)
+                // The personal model, if the user has trained one and wants it used.
+                val personal = graph.personalModel.weights.value.takeIf { settings.usePersonalModel }
                 val window = FloatArray(model.windowSize)
                 val hop = model.windowSize / 2
                 val hopMs = hop * 1000L / model.sampleRate
@@ -175,7 +178,7 @@ class RecordingService : Service() {
                                 timestampMs = t - hopMs,
                                 durationMs = hopMs,
                                 loudnessDbfs = Loudness.dbfs(Loudness.rms(window, window.size - hop, hop)),
-                                snoreProbability = evidence.snoreProbability,
+                                snoreProbability = PersonalTraining.snoreProbability(evidence.snoreProbability, scores, personal),
                                 otherSound = evidence.otherSound,
                                 otherLabel = evidence.otherLabel,
                                 otherConfidence = evidence.otherConfidence,
