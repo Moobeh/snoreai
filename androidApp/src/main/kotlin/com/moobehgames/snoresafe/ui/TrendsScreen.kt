@@ -57,9 +57,13 @@ fun TrendsScreen(
     sessions: List<SessionSummary>,
     logs: Map<String, com.moobehgames.snoresafe.core.tags.NightLog>,
     customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
+    modifier: Modifier = Modifier,
+    activeTrial: com.moobehgames.snoresafe.core.insights.RemedyTrial? = null,
+    finishedTrials: List<com.moobehgames.snoresafe.core.insights.RemedyTrial> = emptyList(),
+    onStartTrial: (String, Int) -> Unit = { _, _ -> },
+    onStopTrial: () -> Unit = {},
     onOpenNight: (String) -> Unit,
     onShareReport: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val offset = remember { TimeZone.getDefault().getOffset(System.currentTimeMillis()).toLong() }
     val today = remember { Trends.nightDay(System.currentTimeMillis() + 12 * 60 * 60 * 1000L, offset) }
@@ -122,6 +126,31 @@ fun TrendsScreen(
                 if (from == null) sessions else sessions.filter { Trends.nightDay(it.startEpochMs, offset) >= from }
             }
             WhatHelps(periodSessions, logs, customTags)
+        }
+
+        // Remedy trials: a fair test of one remedy, with a clear verdict.
+        var startingTrial by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+        if (activeTrial != null) {
+            TrialCard(activeTrial, customTags, onStopTrial)
+            TrialResultText(activeTrial, sessions, customTags)
+        } else {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.trial_start_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = { startingTrial = true }) { Text(stringResource(R.string.trial_start)) }
+                }
+            }
+        }
+        if (finishedTrials.isNotEmpty()) {
+            Text(stringResource(R.string.trials_done), style = MaterialTheme.typography.titleMedium)
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    finishedTrials.asReversed().forEach { TrialResultText(it, sessions, customTags) }
+                }
+            }
+        }
+        if (startingTrial) {
+            StartTrialDialog(customTags, onStart = { tag, n -> onStartTrial(tag, n); startingTrial = false }, onDismiss = { startingTrial = false })
         }
 
         Text(stringResource(R.string.calendar), style = MaterialTheme.typography.titleMedium)

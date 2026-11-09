@@ -47,7 +47,7 @@ class ScreenshotTest {
     private val night = SampleData.night(0, intensity = 0.9f, seed = 11)
 
     @Test fun home() = shoot("01-home") {
-        HomeScreen(SampleData.history(), false, 0, false, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), emptyList(), noop, false, noop, noop, {}, noop, noop)
+        HomeScreen(SampleData.history(), false, 0, false, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), emptyList(), onEditTonight = noop, batteryGuideSeen = false, onBatteryGuide = noop, onStart = noop, onOpenSession = {}, onSupport = noop, onDismissSupport = noop)
     }
 
     @Test fun results() = shoot("02-results") {
@@ -55,21 +55,24 @@ class ScreenshotTest {
     }
 
     /** Whole results page in one tall image, to check the lower sections render. Not a store screenshot. */
-    @Test @Config(qualifiers = "w360dp-h2700dp-port-night-xxhdpi")
+    @Test @Config(qualifiers = "w360dp-h3100dp-port-night-xxhdpi")
     fun resultsFullPage() = shoot("x-results-full") {
         ResultsScreen(night, SampleData.audio(night), com.moobehgames.snoresafe.core.tags.NightLog(night.id, setOf(com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, com.moobehgames.snoresafe.core.tags.BuiltInTag.NASAL_STRIP.id), "Bit congested", 81f, 3), emptyList(), com.moobehgames.snoresafe.core.settings.WeightUnit.KG, {}, noop, ClipPlayer(), true, { File("x") }, noop, { _, _ -> }, { _, _ -> }, {}, {}, {}, noop, noop)
     }
 
     @Test fun trends() = shoot("03-trends") {
         val h = SampleData.history()
-        TrendsScreen(h, SampleData.logs(h), emptyList(), {}, noop)
+        TrendsScreen(h, SampleData.logs(h), emptyList(), onOpenNight = {}, onShareReport = noop)
     }
 
     /** Whole trends page, to check the "What helps" section. Not a store screenshot. */
-    @Test @Config(qualifiers = "w360dp-h2200dp-port-night-xxhdpi")
+    @Test @Config(qualifiers = "w360dp-h2900dp-port-night-xxhdpi")
     fun trendsFullPage() = shoot("x-trends-full") {
         val h = SampleData.history()
-        TrendsScreen(h, SampleData.logs(h), emptyList(), {}, noop)
+        val trial = com.moobehgames.snoresafe.core.insights.RemedyTrials.create(
+            com.moobehgames.snoresafe.core.tags.BuiltInTag.MOUTH_TAPE.id, upcomingNightDay() - 4, 14, 0, kotlin.random.Random(1),
+        )
+        TrendsScreen(h, SampleData.logs(h), emptyList(), activeTrial = trial, onOpenNight = {}, onShareReport = noop)
     }
 
     @Test fun batteryGuideSamsung() = shoot("x-battery-samsung") {

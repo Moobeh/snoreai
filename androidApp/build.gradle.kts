@@ -20,6 +20,17 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        // Shared debug key (standard Android test key, not a secret) so test builds from any
+        // machine or CI install over each other without wiping data. Never used for Play.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true

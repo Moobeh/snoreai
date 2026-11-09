@@ -48,12 +48,14 @@ fun HomeScreen(
     customTags: List<com.moobehgames.snoresafe.core.tags.CustomTag>,
     onEditTonight: () -> Unit,
     batteryGuideSeen: Boolean,
+    modifier: Modifier = Modifier,
+    activeTrial: com.moobehgames.snoresafe.core.insights.RemedyTrial? = null,
+    onStopTrial: () -> Unit = {},
     onBatteryGuide: () -> Unit,
     onStart: () -> Unit,
     onOpenSession: (String) -> Unit,
     onSupport: () -> Unit,
     onDismissSupport: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
@@ -79,6 +81,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
+            if (activeTrial != null) item { TrialCard(activeTrial, customTags, onStopTrial) }
             item { TonightCard(tonightTags, customTags, onEditTonight) }
             if (showSupportCard) item { SupportCard(onSupport, onDismissSupport) }
             if (permissionDenied) item { PermissionCard() }

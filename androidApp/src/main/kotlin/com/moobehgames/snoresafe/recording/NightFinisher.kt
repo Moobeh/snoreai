@@ -28,6 +28,15 @@ class NightFinisher(
             val log = logs.get(summary.id)
             if (log.tags.isEmpty()) logs.save(log.copy(tags = tonight))
         }
+        // A remedy trial decides whether its remedy was in or out tonight.
+        settings.current.activeTrial?.let { trial ->
+            val offset = java.util.TimeZone.getDefault().getOffset(summary.startEpochMs).toLong()
+            val use = trial.assignment(com.moobehgames.snoresafe.core.trends.Trends.nightDay(summary.startEpochMs, offset))
+            if (use != null) {
+                val log = logs.get(summary.id)
+                logs.save(log.copy(tags = if (use) log.tags + trial.tagId else log.tags - trial.tagId))
+            }
+        }
         val nightAudio = audio.read(summary.id)
         audio.deleteClips(summary.id, ClipSelection.toDelete(nightAudio.clips, summary.recordingMode))
         applyStorageLimits()

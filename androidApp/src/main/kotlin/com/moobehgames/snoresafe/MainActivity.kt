@@ -188,6 +188,8 @@ class MainActivity : ComponentActivity() {
                             customTags = settings.customTags,
                             onEditTonight = { pickTagsFor = "tonight" },
                             batteryGuideSeen = settings.batteryGuideSeen,
+                            activeTrial = settings.activeTrial,
+                            onStopTrial = vm::stopTrial,
                             onBatteryGuide = { go("battery") },
                             onStart = {
                                 if (hasMic()) RecordingService.start(this) else {
@@ -200,7 +202,13 @@ class MainActivity : ComponentActivity() {
                             onDismissSupport = vm::dismissSupportCard,
                             modifier = m,
                         )
-                        "trends" -> TrendsScreen(sessions, logs, settings.customTags, onOpenNight = { go("night:$it") }, onShareReport = data.shareTrendReport, modifier = m)
+                        "trends" -> TrendsScreen(
+                            sessions, logs, settings.customTags,
+                            activeTrial = settings.activeTrial,
+                            finishedTrials = settings.finishedTrials,
+                            onStartTrial = vm::startTrial,
+                            onStopTrial = vm::stopTrial,
+                            onOpenNight = { go("night:$it") }, onShareReport = data.shareTrendReport, modifier = m)
                         else -> SettingsScreen(
                             settings = settings,
                             update = vm::updateSettings,
@@ -253,6 +261,7 @@ class MainActivity : ComponentActivity() {
                                     onBack = { vm.player.stop(); back() },
                                     onDelete = { vm.deleteNight(id); back() },
                                     onBatteryGuide = { go("battery") },
+                                    onShareReel = { data.shareReel(session, audio) },
                                 )
                             }
                         }
@@ -338,6 +347,7 @@ class MainActivity : ComponentActivity() {
         val exportCsv: () -> Unit,
         val exportJson: () -> Unit,
         val shareTrendReport: () -> Unit,
+        val shareReel: (com.moobehgames.snoresafe.core.session.SessionSummary, SessionAudio) -> Unit,
         val shareNight: (com.moobehgames.snoresafe.core.session.SessionSummary, SessionAudio?) -> Unit,
         val Dialogs: @Composable () -> Unit,
     )
@@ -427,6 +437,26 @@ class MainActivity : ComponentActivity() {
                 scope.launch {
                     val file = withContext(Dispatchers.IO) { PdfReport.trend(this@MainActivity, appGraph.sessions.all(), File(sharedDir(), "SnoreSafe-trends-${stamp()}.pdf")) }
                     Sharing.share(this@MainActivity, listOf(file), "application/pdf", getString(R.string.share_trend_report))
+                }
+            },
+            shareReel = { session, audio ->
+                scope.launch {
+                    val parts = com.moobehgames.snoresafe.core.insights.HighlightReel.plan(audio.clips)
+                    if (parts.isEmpty()) {
+                        toast(getString(R.string.reel_none))
+                        return@launch
+                    }
+                    val file = withContext(Dispatchers.IO) {
+                        runCatching {
+                            com.moobehgames.snoresafe.audio.ReelBuilder.build(
+                                parts,
+                                { p -> appGraph.audio.fileFor(session.id, p.clip) },
+                                File(sharedDir(), "SnoreSafe-highlights-${stamp()}.m4a"),
+                            )
+                        }.getOrNull()
+                    }
+                    if (file == null) toast(getString(R.string.reel_failed))
+                    else Sharing.share(this@MainActivity, listOf(file), "audio/mp4", getString(R.string.share_reel))
                 }
             },
             shareNight = { session, audio ->

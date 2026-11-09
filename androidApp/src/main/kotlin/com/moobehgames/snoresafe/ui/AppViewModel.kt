@@ -58,6 +58,22 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         s.copy(customTags = s.customTags.filterNot { it.id == id }, tonightTags = s.tonightTags - id)
     }
 
+    fun startTrial(tagId: String, nights: Int) = updateSettings {
+        it.copy(activeTrial = com.moobehgames.snoresafe.core.insights.RemedyTrials.create(tagId, upcomingNightDay(), nights, System.currentTimeMillis()))
+    }
+
+    fun stopTrial() = updateSettings { it.copy(activeTrial = null) }
+
+    /** A trial that has run its course moves to the finished list, keeping its result. */
+    private fun finishTrialIfOver() = updateSettings { s ->
+        val t = s.activeTrial
+        if (t != null && t.isOver(upcomingNightDay())) s.copy(activeTrial = null, finishedTrials = s.finishedTrials + t) else s
+    }
+
+    init {
+        finishTrialIfOver()
+    }
+
     fun audioFor(sessionId: String): Flow<SessionAudio> =
         graph.audio.changes.map { graph.audio.read(sessionId) }.flowOn(Dispatchers.IO)
 

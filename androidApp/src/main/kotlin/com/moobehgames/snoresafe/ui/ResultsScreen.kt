@@ -90,6 +90,7 @@ fun ResultsScreen(
     onBack: () -> Unit,
     onDelete: () -> Unit,
     onBatteryGuide: () -> Unit = {},
+    onShareReel: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var confirmDelete by remember { mutableStateOf(false) }
@@ -160,6 +161,8 @@ fun ResultsScreen(
                 Text(stringResource(R.string.timeline_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
+            DisturbancesSection(session, audio, playing, ::play)
+
             SoundsSection(session, audio, playing, ::play)
 
             RecordingsSection(audio, playing, ::play, onPin, onLabel) { confirmClipDelete = it }
@@ -180,14 +183,19 @@ fun ResultsScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box {
-                    TextButton(onClick = { if (audio.clips.any { it.pinned }) shareMenu = true else onShare(false) }) {
+                    TextButton(onClick = { shareMenu = true }) {
                         Icon(Icons.Filled.Share, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.share_report))
                     }
                     DropdownMenu(expanded = shareMenu, onDismissRequest = { shareMenu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.share_report)) }, onClick = { shareMenu = false; onShare(false) })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.share_report_with_clips)) }, onClick = { shareMenu = false; onShare(true) })
+                        if (audio.clips.any { it.pinned }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.share_report_with_clips)) }, onClick = { shareMenu = false; onShare(true) })
+                        }
+                        if (audio.clips.any { it.kind == ClipKind.SNORE || it.kind == ClipKind.SOUND }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.share_reel)) }, onClick = { shareMenu = false; onShareReel() })
+                        }
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -438,6 +446,67 @@ private fun LabelButton(clip: AudioClip, onLabel: (com.moobehgames.snoresafe.cor
             DropdownMenuItem(text = { Text(stringResource(R.string.label_not_snoring)) }, onClick = { open = false; onLabel(com.moobehgames.snoresafe.core.audio.ClipLabel.NOT_SNORING) })
             if (clip.userLabel != null) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.label_clear)) }, onClick = { open = false; onLabel(null) })
+            }
+        }
+    }
+}
+
+/** Sounds that seemed to change the night, plus the bedroom's steady background noise. */
+@Composable
+private fun DisturbancesSection(session: SessionSummary, audio: SessionAudio, playing: ClipPlayer.State, play: (AudioClip, Long?) -> Unit) {
+    val context = LocalContext.current
+    val disturbances = remember(session.id) {
+        com.moobehgames.snoresafe.core.insights.Disturbances.analyse(session)
+            .filter { it.effect != com.moobehgames.snoresafe.core.insights.DisturbanceEffect.NO_CLEAR_CHANGE || it.event.sound.notable }
+    }
+    val background = remember(session.id) { com.moobehgames.snoresafe.core.insights.Disturbances.background(session) }
+    if (disturbances.isEmpty() && background.isEmpty()) return
+
+    if (disturbances.isNotEmpty()) {
+        Text(stringResource(R.string.disturbances), style = MaterialTheme.typography.titleMedium)
+        Card {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                disturbances.forEach { d ->
+                    val clip = audio.clips.firstOrNull { it.kind == ClipKind.SOUND && it.sound == d.event.sound && it.covers(d.event.startEpochMs + 1_000) }
+                        ?: audio.clips.firstOrNull { it.kind == ClipKind.SOUND && it.sound == d.event.sound && kotlin.math.abs(it.startEpochMs - d.event.startEpochMs) < 60_000 }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("${formatTime(context, d.event.startEpochMs)} · ${soundLabel(d.event.sound)}", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                when (d.effect) {
+                                    com.moobehgames.snoresafe.core.insights.DisturbanceEffect.SNORING_STOPPED ->
+                                        stringResource(R.string.disturbance_stopped, formatDuration(d.quietMinutes * 60_000L))
+                                    com.moobehgames.snoresafe.core.insights.DisturbanceEffect.SNORING_LOUDER -> stringResource(R.string.disturbance_louder)
+                                    com.moobehgames.snoresafe.core.insights.DisturbanceEffect.NO_CLEAR_CHANGE -> stringResource(R.string.disturbance_none)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (clip != null) PlayButton(clip, playing) { play(clip, null) }
+                    }
+                }
+            }
+        }
+    }
+    if (background.isNotEmpty()) {
+        Text(stringResource(R.string.bedroom_noise), style = MaterialTheme.typography.titleMedium)
+        Card {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                background.forEach { b ->
+                    Text(
+                        stringResource(R.string.bedroom_noise_item, soundLabel(b.sound), formatDuration(b.ms), stringResource(R.string.percent_value, b.percentOfNight.roundToInt())),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                val sounds = background.map { it.sound }.toSet()
+                val tip = when {
+                    com.moobehgames.snoresafe.core.analysis.NightSound.MEDIA in sounds -> R.string.tip_media
+                    com.moobehgames.snoresafe.core.analysis.NightSound.TRAFFIC in sounds -> R.string.tip_traffic
+                    com.moobehgames.snoresafe.core.analysis.NightSound.FAN_OR_AC in sounds -> R.string.tip_fan
+                    else -> null
+                }
+                if (tip != null) Text(stringResource(tip), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

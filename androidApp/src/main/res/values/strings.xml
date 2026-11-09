@@ -453,4 +453,46 @@
         <item>Choose \"Unrestricted\" (on some phones, \"Don\'t optimise\").</item>
         <item>While SnoreSafe is listening, don\'t swipe it away from recent apps.</item>
     </string-array>
+
+    <!-- Remedy trials -->
+    <string name="trial_start">Test a remedy properly</string>
+    <string name="trial_start_body">SnoreSafe shuffles nights with and without it in equal numbers, so the result is fair, then tells you whether it really made a difference.</string>
+    <string name="trial_pick">What to test</string>
+    <string name="trial_length">How long</string>
+    <string name="trial_begin">Start the trial</string>
+    <string name="trial_title">Trial: %1$s</string>
+    <string name="trial_tonight_use">Tonight: use %1$s</string>
+    <string name="trial_tonight_skip">Tonight: no %1$s</string>
+    <string name="trial_waiting">Starts tonight</string>
+    <string name="trial_stop">Stop the trial</string>
+    <string name="trial_stop_body">The trial will end now. Results so far stay in your nights.</string>
+    <string name="trial_result_helps">%1$s lowered your score by %2$s. That\'s very unlikely to be chance.</string>
+    <string name="trial_result_worse">%1$s raised your score by %2$s. That\'s very unlikely to be chance.</string>
+    <string name="trial_result_none">No clear difference with %1$s (with: %2$s, without: %3$s).</string>
+    <string name="trial_result_few">Not enough recorded nights to judge %1$s yet.</string>
+    <string name="trials_done">Finished trials</string>
+    <plurals name="trial_progress">
+        <item quantity="one">Night %1$d of %2$d</item>
+        <item quantity="other">Night %1$d of %2$d</item>
+    </plurals>
+    <plurals name="nights_choice">
+        <item quantity="one">%1$d night</item>
+        <item quantity="other">%1$d nights</item>
+    </plurals>
+
+    <!-- Disturbances -->
+    <string name="disturbances">What disturbed your night</string>
+    <string name="disturbance_stopped">Snoring stopped for %1$s afterwards, often a sign of waking or lighter sleep.</string>
+    <string name="disturbance_louder">Snoring got louder afterwards.</string>
+    <string name="disturbance_none">No clear change in your snoring.</string>
+    <string name="bedroom_noise">Bedroom background noise</string>
+    <string name="bedroom_noise_item">%1$s for %2$s (%3$s of the night)</string>
+    <string name="tip_media">Tip: a sleep timer on the TV or music could make your nights quieter.</string>
+    <string name="tip_traffic">Tip: traffic noise can be eased with closed windows, heavy curtains or earplugs.</string>
+    <string name="tip_fan">Steady fan noise is usually fine, and can mask other sounds.</string>
+
+    <!-- Highlight reel -->
+    <string name="share_reel">Share highlight reel</string>
+    <string name="reel_none">Not enough recordings for a highlight reel.</string>
+    <string name="reel_failed">Couldn\'t make the highlight reel.</string>
 </resources>

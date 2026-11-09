@@ -63,6 +63,10 @@ data class AppSettings(
     val usePersonalModel: Boolean = true,
     /** The user has opened the battery guide at least once (hides the home reminder on phones with extra savers). */
     val batteryGuideSeen: Boolean = false,
+    /** A remedy trial in progress, if any. */
+    val activeTrial: com.moobehgames.snoresafe.core.insights.RemedyTrial? = null,
+    /** Trials that ran to the end, newest last, so their results stay visible. */
+    val finishedTrials: List<com.moobehgames.snoresafe.core.insights.RemedyTrial> = emptyList(),
 ) {
     init {
         require(startDelayMinutes in 0..120 && autoResumeMinutes in 0..240)
