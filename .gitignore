@@ -7,4 +7,5 @@ local.properties
 .DS_Store
 captures/
 *.keystore
+!androidApp/debug.keystore
 *.jks
