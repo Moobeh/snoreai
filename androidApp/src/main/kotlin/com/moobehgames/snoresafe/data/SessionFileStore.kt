@@ -30,7 +30,7 @@ class SessionFileStore(private val dir: File) {
     fun all(): List<SessionSummary> =
         (dir.listFiles { f -> f.isFile && f.name.endsWith(".json") } ?: emptyArray())
             .mapNotNull { f ->
-                runCatching { SessionCodec.decodeSummary(f.readText()) }
+                runCatching { SessionCodec.decodeSummary(f.readSecureText()) }
                     .onFailure { Log.w(TAG, "Skipping unreadable session ${f.name}", it) }
                     .getOrNull()
             }
@@ -40,7 +40,7 @@ class SessionFileStore(private val dir: File) {
     fun get(id: String): SessionSummary? {
         if (!SAFE_ID.matches(id)) return null
         val f = File(dir, "$id.json")
-        return if (f.isFile) runCatching { SessionCodec.decodeSummary(f.readText()) }.getOrNull() else null
+        return if (f.isFile) runCatching { SessionCodec.decodeSummary(f.readSecureText()) }.getOrNull() else null
     }
 
     @Synchronized

@@ -53,6 +53,14 @@ jobs:
             androidApp/build/reports/
           if-no-files-found: ignore
 
+      - name: Upload screen renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: androidApp/build/screenshots/
+          if-no-files-found: ignore
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

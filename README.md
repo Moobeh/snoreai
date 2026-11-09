@@ -10,6 +10,7 @@ All listening and analysis happen on the phone; the app has no internet permissi
 | `shared/` | Kotlin Multiplatform core: loudness, snore detection, Snore Score, session statistics, gap detection, on-device personal model. No Android code — tested on the JVM. |
 | `androidApp/` | Android app: microphone foreground service, YAMNet on LiteRT, storage, Jetpack Compose UI. |
 | `docs/feature-spec.md` | Product spec and decisions. |
+| `brand/` | Icon master (SVG), Play icon 512 px, feature graphic 1024×500, phone screenshots. |
 
 ## Pipeline
 
@@ -21,7 +22,9 @@ mic (16 kHz mono) → 0.975 s window, 0.49 s hop → YAMNet (LiteRT, on device)
   → SessionSummary (saved on device)
 ```
 
-Raw audio is analysed and discarded. If the phone kills the app overnight, the last
+Raw audio is analysed and discarded, except the clips the recording mode keeps. Everything stored
+(nights, notes, settings, checkpoints, the personal model, recordings) is encrypted with an
+AES-256-GCM key held in the Android Keystore; files from older versions are encrypted on first start. If the phone kills the app overnight, the last
 checkpoint is turned into a night marked "recovered" on the next launch.
 
 ## Build
@@ -37,7 +40,11 @@ Requires JDK 17+ and the Android SDK (platform 36).
 ```
 
 `check` includes a permission guard: the build fails if any variant's merged manifest
-requests internet, network-state or advertising-ID permissions.
+requests internet, network-state or advertising-ID permissions, or contains telemetry
+components (Google datatransport, Firebase, ads, measurement).
+
+`check` also renders every main screen with Robolectric (no emulator needed); images land in
+`androidApp/build/screenshots/` and are uploaded by CI.
 
 ## Versions
 

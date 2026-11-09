@@ -14,13 +14,16 @@ import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.moobehgames.snoresafe.appGraph
+import com.moobehgames.snoresafe.audio.ClipRecorder
 import com.moobehgames.snoresafe.audio.MicSource
 import com.moobehgames.snoresafe.core.analysis.FrameEvidence
 import com.moobehgames.snoresafe.core.analysis.Loudness
 import com.moobehgames.snoresafe.core.analysis.SnoreDetector
 import com.moobehgames.snoresafe.core.analysis.SoundTaxonomy
+import com.moobehgames.snoresafe.core.ml.PersonalTraining
 import com.moobehgames.snoresafe.core.session.EndReason
 import com.moobehgames.snoresafe.core.session.SessionAccumulator
+import com.moobehgames.snoresafe.data.freeBytes
 import com.moobehgames.snoresafe.ml.YamnetClassifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +93,7 @@ class RecordingService : Service() {
 
     private fun CoroutineScope.runSession() {
         val graph = appGraph
+        val settings = graph.settings.current
         var result: RecordingState = RecordingState.Idle
         try {
             val classifier = try {
@@ -101,19 +105,13 @@ class RecordingService : Service() {
             }
             classifier.use { model ->
                 val taxonomy = SoundTaxonomy(model.labels)
-                val detector = SnoreDetector(graph.detectionSettings)
+                val detector = SnoreDetector(settings.detection)
+                // The personal model, if the user has trained one and wants it used.
+                val personal = graph.personalModel.weights.value.takeIf { settings.usePersonalModel }
                 val window = FloatArray(model.windowSize)
                 val hop = model.windowSize / 2
                 val hopMs = hop * 1000L / model.sampleRate
-
-                // Wall-clock times derived from the monotonic clock: immune to clock changes,
-                // and it keeps counting through deep sleep, so freezes show up as gaps.
-                val startWall = System.currentTimeMillis()
-                val startElapsed = SystemClock.elapsedRealtime()
-                fun now() = startWall + (SystemClock.elapsedRealtime() - startElapsed)
-
-                val acc = SessionAccumulator.start(UUID.randomUUID().toString(), startWall)
-                var lastCheckpoint = startWall
+                val newestHop = FloatArray(hop)
 
                 val mic = try {
                     MicSource(model.sampleRate)
@@ -123,23 +121,72 @@ class RecordingService : Service() {
                     return
                 }
                 mic.use {
+                    // Start delay: hold the microphone (Android won't let us open it later from
+                    // the background) but discard audio until it's time to listen.
+                    val listenAt = System.currentTimeMillis() + settings.startDelayMinutes * 60_000L
+                    if (settings.startDelayMinutes > 0) {
+                        RecordingStateHolder.set(RecordingState.Waiting(listenAt))
+                        while (isActive && !stopRequested && System.currentTimeMillis() < listenAt) {
+                            mic.readFully(newestHop, 0, hop)
+                        }
+                        if (stopRequested) {
+                            result = RecordingState.Idle
+                            return
+                        }
+                    }
+
+                    // Wall-clock times derived from the monotonic clock: immune to clock changes,
+                    // and it keeps counting through deep sleep, so freezes show up as gaps.
+                    val startWall = System.currentTimeMillis()
+                    val startElapsed = SystemClock.elapsedRealtime()
+                    fun now() = startWall + (SystemClock.elapsedRealtime() - startElapsed)
+
+                    val sessionId = UUID.randomUUID().toString()
+                    val acc = SessionAccumulator.start(sessionId, startWall, settings.recordingMode)
+                    val clips = ClipRecorder(
+                        store = graph.audio,
+                        sessionId = sessionId,
+                        sampleRate = model.sampleRate,
+                        hopSamples = hop,
+                        mode = settings.recordingMode,
+                        saveOtherSounds = settings.saveOtherSoundClips,
+                        freeBytes = { freeBytes(this@RecordingService) },
+                    )
+                    var lastCheckpoint = startWall
+                    var pausedAt: Long? = null
+
                     mic.readFully(window, 0, window.size)
                     while (isActive && !stopRequested && now() - startWall < MAX_SESSION_MS) {
                         val t = now()
+                        // Auto-resume a pause that has run its course.
+                        val autoResumeAt = pausedAt?.let { p -> settings.autoResumeMinutes.takeIf { it > 0 }?.let { p + it * 60_000L } }
+                        if (autoResumeAt != null && t >= autoResumeAt) pauseRequested = false
                         if (pauseRequested != acc.isPaused) {
-                            if (pauseRequested) acc.pause(t) else acc.resume(t)
+                            if (pauseRequested) {
+                                acc.pause(t)
+                                clips.closeAll(t)
+                                pausedAt = t
+                            } else {
+                                acc.resume(t)
+                                pausedAt = null
+                            }
                         }
                         if (!acc.isPaused) {
-                            val evidence = taxonomy.evidence(model.classify(window))
+                            val scores = model.classify(window)
+                            val evidence = taxonomy.evidence(scores)
                             val frame = FrameEvidence(
                                 timestampMs = t - hopMs,
                                 durationMs = hopMs,
                                 loudnessDbfs = Loudness.dbfs(Loudness.rms(window, window.size - hop, hop)),
-                                snoreProbability = evidence.snoreProbability,
+                                snoreProbability = PersonalTraining.snoreProbability(evidence.snoreProbability, scores, personal),
                                 otherSound = evidence.otherSound,
+                                otherLabel = evidence.otherLabel,
+                                otherConfidence = evidence.otherConfidence,
                             )
                             val verdict = detector.assess(frame)
                             acc.add(frame, verdict)
+                            System.arraycopy(window, window.size - hop, newestHop, 0, hop)
+                            clips.onHop(newestHop, t, frame, verdict, scores)
                             RecordingStateHolder.set(
                                 RecordingState.Active(
                                     startEpochMs = startWall,
@@ -149,11 +196,22 @@ class RecordingService : Service() {
                                     band = verdict.band,
                                     intensity = verdict.intensity,
                                     scoreSoFar = acc.liveScore(),
+                                    lastSound = if (verdict.isSnore) null else frame.otherSound,
                                 ),
                             )
                         } else {
-                            val s = RecordingStateHolder.state.value
-                            if (s is RecordingState.Active) RecordingStateHolder.set(s.copy(paused = true, elapsedMs = t - startWall))
+                            RecordingStateHolder.set(
+                                RecordingState.Active(
+                                    startEpochMs = startWall,
+                                    elapsedMs = t - startWall,
+                                    paused = true,
+                                    snoringNow = false,
+                                    band = com.moobehgames.snoresafe.core.analysis.SnoreBand.QUIET,
+                                    intensity = 0f,
+                                    scoreSoFar = acc.liveScore(),
+                                    autoResumeAtEpochMs = autoResumeAt,
+                                ),
+                            )
                         }
                         if (t - lastCheckpoint >= CHECKPOINT_EVERY_MS) {
                             graph.checkpoints.write(acc.state)
@@ -164,11 +222,19 @@ class RecordingService : Service() {
                         System.arraycopy(window, hop, window, 0, window.size - hop)
                         mic.readFully(window, window.size - hop, hop)
                     }
+                    val end = now()
+                    clips.closeAll(end)
+                    val summary = acc.finish(end, EndReason.USER)
+                    graph.checkpoints.clear()
+                    val moment = if (summary.monitoredMs >= MIN_SAVED_MS) {
+                        graph.finisher.finish(summary)
+                    } else {
+                        // Too short to be a night: drop it and its audio.
+                        graph.audio.deleteSession(sessionId)
+                        null
+                    }
+                    result = if (summary.monitoredMs >= MIN_SAVED_MS) RecordingState.Finished(summary.id, moment) else RecordingState.Idle
                 }
-                val summary = acc.finish(now(), EndReason.USER)
-                graph.sessions.save(summary)
-                graph.checkpoints.clear()
-                result = RecordingState.Finished(summary.id)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Session failed", e)
@@ -204,6 +270,9 @@ class RecordingService : Service() {
 
         private const val CHECKPOINT_EVERY_MS = 60_000L
         private const val MAX_SESSION_MS = 16L * 60 * 60 * 1000
+
+        /** Sessions shorter than this are discarded (accidental taps). */
+        private const val MIN_SAVED_MS = 60_000L
 
         fun intent(context: Context, action: String): Intent =
             Intent(context, RecordingService::class.java).setAction(action)

@@ -11,6 +11,16 @@
 
     <uses-feature android:name="android.hardware.microphone" android:required="true" />
 
+    <!--
+        Play Billing (used only for the optional tip jar) bundles Google's "datatransport"
+        diagnostics, which would upload billing logs. Strip its network permissions, upload
+        scheduler and backend registration: billing itself talks to the Play Store app on the
+        phone and keeps working, while the diagnostics have nowhere to go and are dropped.
+        The build's permission guard fails if any of this comes back.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+
     <application
         android:name=".SnoreSafeApp"
         android:allowBackup="false"
@@ -34,6 +44,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <service
+            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+            tools:node="remove" />
+        <service
+            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+            tools:node="remove" />
+        <receiver
+            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+            tools:node="remove" />
 
         <service
             android:name=".recording.RecordingService"

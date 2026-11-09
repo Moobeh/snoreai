@@ -46,6 +46,8 @@ fun RecordingScreen(
 ) {
     var confirmStop by remember { mutableStateOf(false) }
     val active = state as? RecordingState.Active
+    val waiting = state as? RecordingState.Waiting
+    val context = androidx.compose.ui.platform.LocalContext.current
     val dot by animateColorAsState(
         when {
             active == null || active.paused -> BandColors.quiet
@@ -66,9 +68,13 @@ fun RecordingScreen(
             Spacer(Modifier.height(16.dp))
             Text(
                 when {
+                    waiting != null -> stringResource(R.string.recording_waiting, formatTime(context, waiting.listenAtEpochMs))
                     active == null -> stringResource(R.string.recording_starting)
+                    active.paused && active.autoResumeAtEpochMs != null ->
+                        stringResource(R.string.recording_paused_until, formatTime(context, active.autoResumeAtEpochMs))
                     active.paused -> stringResource(R.string.recording_paused)
                     active.snoringNow -> stringResource(R.string.recording_snoring_now)
+                    active.lastSound != null -> stringResource(R.string.recording_heard, soundLabel(active.lastSound))
                     else -> stringResource(R.string.recording_listening)
                 },
                 color = dim,
