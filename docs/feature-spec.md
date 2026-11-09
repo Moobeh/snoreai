@@ -59,6 +59,8 @@ Built: recording with start delay, pause and auto-resume; on-device detection; o
 
 Battery guides: the phone's maker is detected; short guides for Samsung, Xiaomi/Redmi/POCO, Huawei/Honor, OnePlus/Oppo/Realme, vivo and stock Android, with best-effort shortcuts into each maker's settings. Shown in onboarding, on the home battery card (until opened once on phones with extra savers), after a night that was cut short, and in Settings.
 
+Also built: remedy trials (fair shuffled tests with a verdict), "What disturbed your night" with bedroom background noise, and a shareable highlight reel.
+
 Not yet: bedtime reminder, crash reports, session extras (adjust times, merge, warnings, face-down screen-off, night clock, quick-settings tile), translations.
 
 ## 5. Remedies & factors — Settled
